@@ -268,7 +268,7 @@ Public Class SAPNetworkPI
                     aErr = True
                 End If
                 For i As Integer = 0 To oE_MESSAGE_TABLE.Count - 1
-                    addComponent = addComponent & ";" & oE_MESSAGE_TABLE(i).GetValue("MESSAGE")
+                    addComponent = addComponent & ";" & oE_MESSAGE_TABLE(i).GetValue("MESSAGE_TEXT")
                 Next i
                 If aErr = False Then
                     Dim aSAPBapiTranctionCommit As New SAPBapiTranctionCommit(sapcon)

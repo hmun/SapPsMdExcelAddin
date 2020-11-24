@@ -59,6 +59,7 @@
         Me.SapPsMdLogon = Me.Factory.CreateRibbonGroup
         Me.ButtonLogon = Me.Factory.CreateRibbonButton
         Me.ButtonLogoff = Me.Factory.CreateRibbonButton
+        Me.ButtonWbsSettlementCreate = Me.Factory.CreateRibbonButton
         Me.SapPsMd.SuspendLayout()
         Me.Group1.SuspendLayout()
         Me.SAPProject.SuspendLayout()
@@ -108,6 +109,7 @@
         '
         Me.SAPProject.Items.Add(Me.ButtonProjectCreate)
         Me.SAPProject.Items.Add(Me.ButtonWbsCreate)
+        Me.SAPProject.Items.Add(Me.ButtonWbsSettlementCreate)
         Me.SAPProject.Label = "PS Project"
         Me.SAPProject.Name = "SAPProject"
         '
@@ -188,6 +190,13 @@
         Me.ButtonLogoff.Name = "ButtonLogoff"
         Me.ButtonLogoff.ShowImage = True
         '
+        'ButtonWbsSettlementCreate
+        '
+        Me.ButtonWbsSettlementCreate.Image = CType(resources.GetObject("ButtonWbsSettlementCreate.Image"), System.Drawing.Image)
+        Me.ButtonWbsSettlementCreate.Label = "Create WBS Settlement"
+        Me.ButtonWbsSettlementCreate.Name = "ButtonWbsSettlementCreate"
+        Me.ButtonWbsSettlementCreate.ShowImage = True
+        '
         'SapPsMdRibbon
         '
         Me.Name = "SapPsMdRibbon"
@@ -224,6 +233,7 @@
     Friend WithEvents Separator1 As Microsoft.Office.Tools.Ribbon.RibbonSeparator
     Friend WithEvents ButtonNWAECreate As Microsoft.Office.Tools.Ribbon.RibbonButton
     Friend WithEvents ButtonCompCreate As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents ButtonWbsSettlementCreate As Microsoft.Office.Tools.Ribbon.RibbonButton
 End Class
 
 Partial Class ThisRibbonCollection

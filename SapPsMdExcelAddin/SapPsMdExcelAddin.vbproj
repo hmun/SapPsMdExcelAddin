@@ -34,7 +34,7 @@
     <PublishUrl>T:\hmun\VbaGit_64\SapPsMdExcelAddin\x86\</PublishUrl>
     <InstallUrl />
     <TargetCulture>en</TargetCulture>
-    <ApplicationVersion>1.0.0.3</ApplicationVersion>
+    <ApplicationVersion>1.0.0.5</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -274,6 +274,7 @@
     <Compile Include="TSAP_NWAEData.vb" />
     <Compile Include="TSAP_ProjectData.vb" />
     <Compile Include="TSAP_WbsData.vb" />
+    <Compile Include="TSAP_WbsSettleData.vb" />
     <EmbeddedResource Include="FormDestinations.resx">
       <DependentUpon>FormDestinations.vb</DependentUpon>
     </EmbeddedResource>
@@ -343,7 +344,7 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>6BAB58755E88C24AA3612D6503EE9AE9DC851B47</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>FE66A3795EEE112C7F24516441C15AE68E19954F</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>

@@ -99,6 +99,15 @@ Public Class SapPsMdRibbon
         End If
     End Sub
 
+    Private Sub ButtonWbsSettlementCreate_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonWbsSettlementCreate.Click
+        Dim aSapPsMdRibbonWbs As New SapPsMdRibbonWbs
+        If checkCon() = True Then
+            aSapPsMdRibbonWbs.exec_settle(pSapCon:=aSapCon, pMode:="Create")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonWbsSettlementCreate_Click")
+        End If
+    End Sub
+
     Private Sub ButtonNetworkCreate_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonNetworkCreate.Click
         Dim aSapPsMdRibbonNetwork As New SapPsMdRibbonNetwork
         If checkCon() = True Then
@@ -178,4 +187,5 @@ Public Class SapPsMdRibbon
         End If
 
     End Sub
+
 End Class

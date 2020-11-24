@@ -145,4 +145,59 @@ Public Class SAPWBSPI
         fillEXTENSIONIN = aArray
     End Function
 
+    Public Function createSettlementRule(pData As TSAP_WbsSettleData, Optional pOKMsg As String = "OK") As String
+        createSettlementRule = ""
+        Dim aSAPFormat As New SAPFormat(aIntPar)
+        Try
+            oRfcFunction = destination.Repository.CreateFunction("ZPS_KSRG_WBS")
+            RfcSessionManager.BeginContext(destination)
+            Dim oRETURN As IRfcTable = oRfcFunction.GetTable("ET_RETURN")
+            oRETURN.Clear()
+
+            Dim aTStrRec As SAPCommon.TStrRec
+            Dim oStruc As IRfcStructure
+            ' set the header values
+            ' use local Version of the SapFormat.pspid (the common does not support the mask strings)
+            If pData.aHdrRec.aTDataRecCol.Count <> 3 Then
+                createSettlementRule = pOKMsg & "; not relevant"
+                Exit Function
+            End If
+            For Each aTStrRec In pData.aHdrRec.aTDataRecCol
+                If aTStrRec.Strucname <> "" Then
+                    oStruc = oRfcFunction.GetStructure(aTStrRec.Strucname)
+                    oStruc.SetValue(aTStrRec.Fieldname, aTStrRec.formated)
+                Else
+                    If String.IsNullOrEmpty(aTStrRec.Value) Then
+                        createSettlementRule = pOKMsg & "; not relevant"
+                        Exit Function
+                    Else
+                        If Left(aTStrRec.Format, 1) = "P" Then
+                            oRfcFunction.SetValue(aTStrRec.Fieldname, aSAPFormat.pspid(aTStrRec.Value, 18))
+                        Else
+                            oRfcFunction.SetValue(aTStrRec.Fieldname, aTStrRec.formated)
+                        End If
+                    End If
+
+                End If
+            Next
+            ' call the BAPI
+            oRfcFunction.Invoke(destination)
+            Dim aErr As Boolean = False
+            Dim aPreComErr As Boolean = False
+            For i As Integer = 0 To oRETURN.Count - 1
+                createSettlementRule = createSettlementRule & ";" & oRETURN(i).GetValue("MESSAGE")
+                If oRETURN(i).GetValue("TYPE") <> "S" And oRETURN(i).GetValue("TYPE") <> "I" And oRETURN(i).GetValue("TYPE") <> "W" Then
+                    aErr = True
+                End If
+            Next i
+            createSettlementRule = If(createSettlementRule = "", pOKMsg, If(aErr = False, pOKMsg & createSettlementRule, "Error" & createSettlementRule))
+        Catch SapEx As SAP.Middleware.Connector.RfcAbapMessageException
+            createSettlementRule = "Error; " & SapEx.AbapMessageType & "-" & SapEx.AbapMessageClass & "-" & SapEx.AbapMessageNumber & ": " & SapEx.Message
+        Catch Ex As System.Exception
+            MsgBox("Error: Exception " & Ex.Message, MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "SAPWBSPI")
+            createSettlementRule = "Error: Exception in createSettlementRule"
+        Finally
+            RfcSessionManager.EndContext(destination)
+        End Try
+    End Function
 End Class
