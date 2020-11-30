@@ -136,7 +136,8 @@
                                     pEmptyChar:="")
                         End If
                     Next
-                    If aProject <> CStr(aDws.Cells(i + 1, aProjectClmnNr).value) Then
+                    Dim aNextProject As String = nextProject(aDws, i, aMsgClmnNr, aProjectClmnNr, aOKMsg)
+                    If aProject <> aNextProject Then
                         Dim aTSAP_WbsData As New TSAP_WbsData(aPar, aIntPar)
                         If aTSAP_WbsData.fillHeader(aItems) And aTSAP_WbsData.fillData(aItems) Then
                             ' check if we should dump this document
@@ -305,5 +306,16 @@
         End Try
     End Sub
 
+    Function nextProject(ByRef pWs As Excel.Worksheet, pStart As ULong, pMsgClmnNr As Integer, aProjectClmnNr As Integer, pOKMsg As String) As String
+        Dim i As ULong = pStart + 1
+        nextProject = ""
+        Do
+            If Left(CStr(pWs.Cells(i, pMsgClmnNr).Value), Len(pOKMsg)) <> pOKMsg Then
+                nextProject = CStr(pWs.Cells(i, aProjectClmnNr).Value)
+                Exit Function
+            End If
+            i += 1
+        Loop While CStr(pWs.Cells(i, 1).Value) <> ""
+    End Function
 
 End Class

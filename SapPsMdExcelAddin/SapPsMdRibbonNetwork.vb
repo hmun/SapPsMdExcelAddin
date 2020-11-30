@@ -249,7 +249,8 @@
                                     pEmptyChar:="")
                         End If
                     Next
-                    If aNetwork <> CStr(aDws.Cells(i + 1, aNetwClmnNr).value) Then
+                    Dim aNextNetwork As String = nextNetwork(aDws, i, aMsgClmnNr, aNetwClmnNr, aOKMsg)
+                    If aNetwork <> aNextNetwork Then
                         Dim aTSAP_NWAData As New TSAP_NWAData(aPar, aIntPar)
                         If aTSAP_NWAData.fillHeader(aItems) And aTSAP_NWAData.fillData(aItems) Then
                             ' check if we should dump this document
@@ -377,7 +378,8 @@
                                     pEmptyChar:="")
                         End If
                     Next
-                    If aNetwork <> CStr(aDws.Cells(i + 1, aNetwClmnNr).value) Then
+                    Dim aNextNetwork As String = nextNetwork(aDws, i, aMsgClmnNr, aNetwClmnNr, aOKMsg)
+                    If aNetwork <> aNextNetwork Then
                         Dim aTSAP_NWAEData As New TSAP_NWAEData(aPar, aIntPar)
                         If aTSAP_NWAEData.fillHeader(aItems) And aTSAP_NWAEData.fillData(aItems) Then
                             ' check if we should dump this document
@@ -505,7 +507,8 @@
                                     pEmptyChar:="")
                         End If
                     Next
-                    If aNetwork <> CStr(aDws.Cells(i + 1, aNetwClmnNr).value) Then
+                    Dim aNextNetwork As String = nextNetwork(aDws, i, aMsgClmnNr, aNetwClmnNr, aOKMsg)
+                    If aNetwork <> aNextNetwork Then
                         Dim aTSAP_CompData As New TSAP_CompData(aPar, aIntPar)
                         If aTSAP_CompData.fillHeader(aItems) And aTSAP_CompData.fillData(aItems) Then
                             ' check if we should dump this document
@@ -557,4 +560,15 @@
         End Try
     End Sub
 
+    Function nextNetwork(ByRef pWs As Excel.Worksheet, pStart As ULong, pMsgClmnNr As Integer, pNetwClmnNr As Integer, pOKMsg As String) As String
+        Dim i As ULong = pStart + 1
+        nextNetwork = ""
+        Do
+            If Left(CStr(pWs.Cells(i, pMsgClmnNr).Value), Len(pOKMsg)) <> pOKMsg Then
+                nextNetwork = CStr(pWs.Cells(i, pNetwClmnNr).Value)
+                Exit Function
+            End If
+            i += 1
+        Loop While CStr(pWs.Cells(i, 1).Value) <> ""
+    End Function
 End Class
