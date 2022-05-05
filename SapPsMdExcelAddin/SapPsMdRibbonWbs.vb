@@ -1,4 +1,8 @@
-﻿Public Class SapPsMdRibbonWbs
+﻿' Copyright 2020 Hermann Mundprecht
+' This file is licensed under the terms of the license 'CC BY 4.0'. 
+' For a human readable version of the license, see https://creativecommons.org/licenses/by/4.0/
+
+Public Class SapPsMdRibbonWbs
 
     Private Shared ReadOnly log As log4net.ILog = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType)
 
@@ -34,6 +38,7 @@
         Loop
         getGenParameters = True
     End Function
+
     Private Function getIntParameters(ByRef pIntPar As SAPCommon.TStr) As Integer
         Dim aPws As Excel.Worksheet
         Dim aWB As Excel.Workbook
@@ -106,6 +111,10 @@
             Dim aProjectClmn As String = If(aIntPar.value("WBS_COL", "PROJECT") <> "", aIntPar.value("WBS_COL", "PROJECT"), "I_PROJECT_DEFINITION")
             Dim aProjectClmnNr As Integer = 0
             Dim aOKMsg As String = If(aIntPar.value("WBS_RET", "OKMSG") <> "", aIntPar.value("WBS_RET", "OKMSG"), "OK")
+            Dim aSingleMode As String = If(aIntPar.value("WBS", "SINGLE_MODE") <> "", aIntPar.value("WBS", "SINGLE_MODE"), "")
+            If pMode = "CreateSingle" Then
+                aSingleMode = "X"
+            End If
             Globals.SapPsMdExcelAddin.Application.Cursor = Microsoft.Office.Interop.Excel.XlMousePointer.xlWait
             Globals.SapPsMdExcelAddin.Application.EnableEvents = False
             Globals.SapPsMdExcelAddin.Application.ScreenUpdating = False
@@ -137,8 +146,13 @@
                         End If
                     Next
                     Dim aNextProject As String = nextProject(aDws, i, aMsgClmnNr, aProjectClmnNr, aOKMsg)
-                    If aProject <> aNextProject Then
-                        Dim aTSAP_WbsData As New TSAP_WbsData(aPar, aIntPar)
+                    If aProject <> aNextProject Or aSingleMode = "X" Then
+                        Dim aTSAP_WbsData
+                        If pMode = "Change" Then
+                            aTSAP_WbsData = New TSAP_WbsChgData(aPar, aIntPar)
+                        Else
+                            aTSAP_WbsData = New TSAP_WbsData(aPar, aIntPar)
+                        End If
                         If aTSAP_WbsData.fillHeader(aItems) And aTSAP_WbsData.fillData(aItems) Then
                             ' check if we should dump this document
                             If aObjNr = aDumpObjNr Then
@@ -147,7 +161,7 @@
                                 aTSAP_WbsData.dumpData()
                             End If
                             ' post the object here
-                            If pMode = "Create" Then
+                            If pMode = "Create" Or pMode = "CreateSingle" Then
                                 log.Debug("SapPsMdRibbonWbs.exec - " & "calling aSAPWBSPI.createMultiple")
                                 aRetStr = aSAPWBSPI.createMultiple(aTSAP_WbsData)
                                 log.Debug("SapPsMdRibbonWbs.exec - " & "aSAPWBSPI.createMultiple returned, aRetStr=" & aRetStr)
@@ -156,10 +170,14 @@
                                     aDws.Cells(CInt(aKey), aMsgClmnNr) = CStr(aRetStr)
                                 Next
                             ElseIf pMode = "Change" Then
-                                ' log.Debug("SapPsMdRibbonWbs.exec - " & "calling aSAPWBSPI.changeMultiple")
-                                ' aRetStr = aSAPWBSPI.changeMultiple(aTSAP_CCData)
-                                ' log.Debug("SapPsMdRibbonWbs.exec - " & "aSAPWBSPI.changeMultiple returned, aRetStr=" & aRetStr)
-                                ' aDws.Cells(i, aMsgClmnNr) = CStr(aRetStr)
+                                log.Debug("SapPsMdRibbonWbs.exec - " & "calling aSAPWBSPI.changeMultiple")
+                                aRetStr = aSAPWBSPI.changeMultiple(aTSAP_WbsData)
+                                log.Debug("SapPsMdRibbonWbs.exec - " & "aSAPWBSPI.changeMultiple returned, aRetStr=" & aRetStr)
+                                aDws.Cells(i, aMsgClmnNr) = CStr(aRetStr)
+                                ' message has to be written in all lines that where processed in items
+                                For Each aKey In aItems.aTDataDic.Keys
+                                    aDws.Cells(CInt(aKey), aMsgClmnNr) = CStr(aRetStr)
+                                Next
                             End If
                         Else
                             log.Warn("SapPsMdRibbonWbs.exec - " & "filling Header or Data in aTSAP_WbsData failed!")

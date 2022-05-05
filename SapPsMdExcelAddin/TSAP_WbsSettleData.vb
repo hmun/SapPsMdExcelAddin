@@ -1,4 +1,8 @@
-﻿Public Class TSAP_WbsSettleData
+﻿' Copyright 2020 Hermann Mundprecht
+' This file is licensed under the terms of the license 'CC BY 4.0'. 
+' For a human readable version of the license, see https://creativecommons.org/licenses/by/4.0/
+
+Public Class TSAP_WbsSettleData
 
     Public aHdrRec As TDataRec
 
@@ -8,9 +12,11 @@
     Private aIntPar As SAPCommon.TStr
     Private Shared ReadOnly log As log4net.ILog = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType)
 
+    Private aUseAsEmpty As String = "#"
     Public Sub New(ByRef pPar As SAPCommon.TStr, ByRef pIntPar As SAPCommon.TStr)
         aPar = pPar
         aIntPar = pIntPar
+        aUseAsEmpty = If(aIntPar.value("GEN", "USEASEMPTY") <> "", aIntPar.value("GEN", "USEASEMPTY"), "#")
     End Sub
 
     Public Function fillHeader(pData As TData) As Boolean
@@ -23,9 +29,9 @@
             For Each aTStrRec In aPostRec.aTDataRecCol
                 If valid_Hdr_Field(aTStrRec) Then
                     If aTStrRec.Fieldname = "WBS_ELEMENT" Then
-                        aNewHdrRec.setValues("-I_POSID", aTStrRec.Value, aTStrRec.Currency, "P18")
+                        aNewHdrRec.setValues("-I_POSID", aTStrRec.Value, aTStrRec.Currency, "P18", pUseAsEmpty:=aUseAsEmpty)
                     Else
-                        aNewHdrRec.setValues("-" & aTStrRec.Fieldname, aTStrRec.Value, aTStrRec.Currency, aTStrRec.Format)
+                        aNewHdrRec.setValues("-" & aTStrRec.Fieldname, aTStrRec.Value, aTStrRec.Currency, aTStrRec.Format, pUseAsEmpty:=aUseAsEmpty)
                     End If
                 End If
             Next
@@ -42,7 +48,11 @@
     End Function
 
     Private Function isInArray(pString As String, pArray As Object) As Boolean
-        isInArray = (UBound(Filter(pArray, pString)) > -1)
+        Dim st As String, M As String
+        M = "$"
+        st = M & Join(pArray, M) & M
+        isInArray = InStr(st, M & pString & M) > 0
+        ' isInArray = (UBound(Filter(pArray, pString)) > -1)
     End Function
 
     Public Sub dumpHeader()

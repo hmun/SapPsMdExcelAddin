@@ -2,16 +2,18 @@
 ' This file is licensed under the terms of the license 'CC BY 4.0'. 
 ' For a human readable version of the license, see https://creativecommons.org/licenses/by/4.0/
 
-Public Class TSAP_NetworkData
+Public Class TSAP_NetworkChgData
     Public aNetworkinfo As TDataRec
 
-    Private Network_Fields() As String = {"NETWORK", "NETWORK_TYPE", "PROFILE", "PLANT", "MRP_CONTROLLER", "SHORT_TEXT", "START_DATE", "FINISH_DATE", "SCHED_TYPE", "START_DATE_FCST", "FINISH_DATE_FCST", "SCHED_TYPE_FCST", "NOT_AUTO_SCHEDULE", "NOT_AUTO_COSTING", "NOT_MRP_APPLICABLE", "PROJECT_DEFINITION", "WBS_ELEMENT", "SALES_DOC", "SALES_DOC_ITEM", "SUPERIOR_NETW", "SUPERIOR_NETW_ACT", "BUS_AREA", "PROFIT_CTR", "OBJECTCLASS", "TAXJURCODE", "PLANNER_GROUP", "CHANGE_NO", "PRIORITY", "EXEC_FACTOR", "COST_SHEET", "COST_VAR_PLAN", "COST_VAR_ACTUAL", "OVERHEAD_KEY", "SCHEDULING_EXACT_BREAK_TIMES", "NO_CAP_REQUIREMENTS", "CURRENCY", "FUNC_AREA"}
+    Private Network_Fields_Chg() As String = {"MRP_CONTROLLER", "SHORT_TEXT", "START_DATE", "FINISH_DATE", "SCHED_TYPE", "START_DATE_FCST", "FINISH_DATE_FCST", "SCHED_TYPE_FCST", "NOT_AUTO_SCHEDULE", "NOT_AUTO_COSTING", "NOT_MRP_APPLICABLE", "PROJECT_DEFINITION", "WBS_ELEMENT", "SALES_DOC", "SALES_DOC_ITEM", "SUPERIOR_NETW", "SUPERIOR_NETW_ACT", "BUS_AREA", "PROFIT_CTR", "OBJECTCLASS", "TAXJURCODE", "PLANNER_GROUP", "CHANGE_NO", "PRIORITY", "EXEC_FACTOR", "COST_SHEET", "COST_VAR_PLAN", "COST_VAR_ACTUAL", "OVERHEAD_KEY", "SCHEDULING_EXACT_BREAK_TIMES", "NO_CAP_REQUIREMENTS", "CURRENCY", "FUNC_AREA"}
+    Private Network_Fields_Upd() As String = {"MRP_CONTROLLER", "SHORT_TEXT", "START_DATE", "FINISH_DATE", "SCHED_TYPE", "START_DATE_FCST", "FINISH_DATE_FCST", "SCHED_TYPE_FCST", "NOT_AUTO_SCHEDULE", "NOT_AUTO_COSTING", "NOT_MRP_APPLICABLE", "PROJECT_DEFINITION", "WBS_ELEMENT", "SALES_DOC", "SALES_DOC_ITEM", "SUPERIOR_NETW", "SUPERIOR_NETW_ACT", "BUS_AREA", "PROFIT_CTR", "OBJECTCLASS", "TAXJURCODE", "PLANNER_GROUP", "CHANGE_NO", "PRIORITY", "EXEC_FACTOR", "COST_SHEET", "COST_VAR_PLAN", "COST_VAR_ACTUAL", "OVERHEAD_KEY", "SCHEDULING_EXACT_BREAK_TIMES", "NO_CAP_REQUIREMENTS", "CURRENCY", "FUNC_AREA"}
 
     Private aPar As SAPCommon.TStr
     Private aIntPar As SAPCommon.TStr
     Private Shared ReadOnly log As log4net.ILog = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType)
 
-    Private Const sProj As String = "I_NETWORK"
+    Private Const sNetw_Chg As String = "I_NETWORK"
+    Private Const sNetw_Upd As String = "I_NETWORK_UPD"
 
     Private aUseAsEmpty As String = "#"
 
@@ -31,8 +33,13 @@ Public Class TSAP_NetworkData
         ' First fill the value from the paramters and tehn overwrite them from the posting record
         If Not IsNothing(aFirstRec) Then
             For Each aTStrRec In aFirstRec.aTDataRecCol
-                If valid_Network_Field(aTStrRec) Then
+                If valid_Network_Nr(aTStrRec) Then
+                    aNewNetworkinfo.setValues("I_NUMBER", aTStrRec.Value, aTStrRec.Currency, aTStrRec.Format, pUseAsEmpty:=aUseAsEmpty)
+                ElseIf valid_Network_Field_Chg(aTStrRec) Then
                     aNewNetworkinfo.setValues(aTStrRec.getKey(), aTStrRec.Value, aTStrRec.Currency, aTStrRec.Format, pUseAsEmpty:=aUseAsEmpty)
+                    If valid_Network_Field_Upd(aTStrRec) Then
+                        aNewNetworkinfo.setValues(sNetw_Upd & "-" & aTStrRec.Fieldname, "X", "", "", pUseAsEmpty:=aUseAsEmpty)
+                    End If
                 End If
             Next
         End If
@@ -40,10 +47,24 @@ Public Class TSAP_NetworkData
         fillNetworkinfo = True
     End Function
 
-    Public Function valid_Network_Field(pTStrRec As SAPCommon.TStrRec) As Boolean
-        valid_Network_Field = False
+    Public Function valid_Network_Nr(pTStrRec As SAPCommon.TStrRec) As Boolean
+        valid_Network_Nr = False
+        If pTStrRec.Strucname = "I_NETWORK" And pTStrRec.Fieldname = "NETWORK" Then
+            valid_Network_Nr = True
+        End If
+    End Function
+
+    Public Function valid_Network_Field_Chg(pTStrRec As SAPCommon.TStrRec) As Boolean
+        valid_Network_Field_Chg = False
         If pTStrRec.Strucname = "I_NETWORK" Then
-            valid_Network_Field = isInArray(pTStrRec.Fieldname, Network_Fields)
+            valid_Network_Field_Chg = isInArray(pTStrRec.Fieldname, Network_Fields_Chg)
+        End If
+    End Function
+
+    Public Function valid_Network_Field_Upd(pTStrRec As SAPCommon.TStrRec) As Boolean
+        valid_Network_Field_Upd = False
+        If pTStrRec.Strucname = "I_NETWORK" Then
+            valid_Network_Field_Upd = isInArray(pTStrRec.Fieldname, Network_Fields_Upd)
         End If
     End Function
 

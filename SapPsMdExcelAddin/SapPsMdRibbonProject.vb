@@ -1,4 +1,8 @@
-﻿Public Class SapPsMdRibbonProject
+﻿' Copyright 2020 Hermann Mundprecht
+' This file is licensed under the terms of the license 'CC BY 4.0'. 
+' For a human readable version of the license, see https://creativecommons.org/licenses/by/4.0/
+
+Public Class SapPsMdRibbonProject
     Private Shared ReadOnly log As log4net.ILog = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType)
 
     Public Function getGenParameters(ByRef pPar As SAPCommon.TStr) As Integer
@@ -130,7 +134,12 @@
                         End If
                     Next
                     ' aItem = aItems.aTDataDic(aKey)
-                    Dim aTSAP_ProjectData As New TSAP_ProjectData(aPar, aIntPar)
+                    Dim aTSAP_ProjectData
+                    If pMode = "Change" Then
+                        aTSAP_ProjectData = New TSAP_ProjectChgData(aPar, aIntPar)
+                    Else
+                        aTSAP_ProjectData = New TSAP_ProjectData(aPar, aIntPar)
+                    End If
                     If aTSAP_ProjectData.fillProjectinfo(aItems) Then
                         ' check if we should dump this document
                         If aObjNr = aDumpObjNr Then
@@ -144,10 +153,10 @@
                             log.Debug("SapPsMdRibbonProject.exec - " & "aSAPProjectDefinitionPI.createSingle returned, aRetStr=" & aRetStr)
                             aDws.Cells(i, aMsgClmnNr) = CStr(aRetStr)
                         ElseIf pMode = "Change" Then
-                            ' log.Debug("SapPsMdRibbonProject.exec - " & "calling aSAPProjectDefinitionPI.changeSingle")
-                            ' aRetStr = aSAPProjectDefinitionPI.changeSingle(aTSAP_CCData)
-                            ' log.Debug("SapPsMdRibbonProject.exec - " & "aSAPProjectDefinitionPI.changeSingle returned, aRetStr=" & aRetStr)
-                            ' aDws.Cells(i, aMsgClmnNr) = CStr(aRetStr)
+                            log.Debug("SapPsMdRibbonProject.exec - " & "calling aSAPProjectDefinitionPI.changeSingle")
+                            aRetStr = aSAPProjectDefinitionPI.changeSingle(aTSAP_ProjectData)
+                            log.Debug("SapPsMdRibbonProject.exec - " & "aSAPProjectDefinitionPI.changeSingle returned, aRetStr=" & aRetStr)
+                            aDws.Cells(i, aMsgClmnNr) = CStr(aRetStr)
                         End If
                     Else
                         log.Warn("SapPsMdRibbonProject.exec - " & "filling Projectinfo in aTSAP_ProjectData failed!")

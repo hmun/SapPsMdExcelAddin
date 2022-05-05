@@ -90,12 +90,39 @@ Public Class SapPsMdRibbon
         End If
     End Sub
 
+    Private Sub ButtonProjectChange_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonProjectChange.Click
+        Dim aSapPsMdRibbonProject As New SapPsMdRibbonProject
+        If checkCon() = True Then
+            aSapPsMdRibbonProject.exec(pSapCon:=aSapCon, pMode:="Change")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonProjectCreate_Click")
+        End If
+    End Sub
+
     Private Sub ButtonWbsCreate_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonWbsCreate.Click
         Dim aSapPsMdRibbonWbs As New SapPsMdRibbonWbs
         If checkCon() = True Then
             aSapPsMdRibbonWbs.exec(pSapCon:=aSapCon, pMode:="Create")
         Else
             MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonWbsCreate_Click")
+        End If
+    End Sub
+    Private Sub ButtonWbsCreateSingleMode_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonWbsCreateSingleMode.Click
+        Dim aSapPsMdRibbonWbs As New SapPsMdRibbonWbs
+        If checkCon() = True Then
+            aSapPsMdRibbonWbs.exec(pSapCon:=aSapCon, pMode:="CreateSingle")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonWbsCreate_Click")
+        End If
+    End Sub
+
+
+    Private Sub ButtonWbsChange_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonWbsChange.Click
+        Dim aSapPsMdRibbonWbs As New SapPsMdRibbonWbs
+        If checkCon() = True Then
+            aSapPsMdRibbonWbs.exec(pSapCon:=aSapCon, pMode:="Change")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonWbsChange_Click")
         End If
     End Sub
 
@@ -117,12 +144,30 @@ Public Class SapPsMdRibbon
         End If
     End Sub
 
+    Private Sub ButtonNetworkChange_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonNetworkChange.Click
+        Dim aSapPsMdRibbonNetwork As New SapPsMdRibbonNetwork
+        If checkCon() = True Then
+            aSapPsMdRibbonNetwork.exec(pSapCon:=aSapCon, pMode:="Change")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonNetworkChange_Click")
+        End If
+    End Sub
+
     Private Sub ButtonNWACreate_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonNWACreate.Click
         Dim aSapPsMdRibbonNetwork As New SapPsMdRibbonNetwork
         If checkCon() = True Then
             aSapPsMdRibbonNetwork.execNWA(pSapCon:=aSapCon, pMode:="Create")
         Else
             MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonNWACreate_Click")
+        End If
+    End Sub
+
+    Private Sub ButtonNWAChange_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonNWAChange.Click
+        Dim aSapPsMdRibbonNetwork As New SapPsMdRibbonNetwork
+        If checkCon() = True Then
+            aSapPsMdRibbonNetwork.execNWA(pSapCon:=aSapCon, pMode:="Change")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonNWAChange_Click")
         End If
     End Sub
 
@@ -135,12 +180,30 @@ Public Class SapPsMdRibbon
         End If
     End Sub
 
+    Private Sub ButtonNWAEChange_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonNWAEChange.Click
+        Dim aSapPsMdRibbonNetwork As New SapPsMdRibbonNetwork
+        If checkCon() = True Then
+            aSapPsMdRibbonNetwork.execNWAE(pSapCon:=aSapCon, pMode:="Change")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonNWAEChange_Click")
+        End If
+    End Sub
+
     Private Sub ButtonCompCreate_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonCompCreate.Click
         Dim aSapPsMdRibbonNetwork As New SapPsMdRibbonNetwork
         If checkCon() = True Then
             aSapPsMdRibbonNetwork.execCOMP(pSapCon:=aSapCon, pMode:="Create")
         Else
-            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonNWAECreate_Click")
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonCompCreate_Click")
+        End If
+    End Sub
+
+    Private Sub ButtonCompChange_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonCompChange.Click
+        Dim aSapPsMdRibbonNetwork As New SapPsMdRibbonNetwork
+        If checkCon() = True Then
+            aSapPsMdRibbonNetwork.execCOMP(pSapCon:=aSapCon, pMode:="Change")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonCompChange_Click")
         End If
     End Sub
 
@@ -187,5 +250,6 @@ Public Class SapPsMdRibbon
         End If
 
     End Sub
+
 
 End Class

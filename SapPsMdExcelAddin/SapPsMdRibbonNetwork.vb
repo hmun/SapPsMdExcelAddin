@@ -1,4 +1,8 @@
-﻿Public Class SapPsMdRibbonNetwork
+﻿' Copyright 2020 Hermann Mundprecht
+' This file is licensed under the terms of the license 'CC BY 4.0'. 
+' For a human readable version of the license, see https://creativecommons.org/licenses/by/4.0/
+
+Public Class SapPsMdRibbonNetwork
     Private Shared ReadOnly log As log4net.ILog = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType)
 
     Public Function getGenParameters(ByRef pPar As SAPCommon.TStr) As Integer
@@ -129,7 +133,12 @@
                         End If
                     Next
                     ' aItem = aItems.aTDataDic(aKey)
-                    Dim aTSAP_NetworkData As New TSAP_NetworkData(aPar, aIntPar)
+                    Dim aTSAP_NetworkData
+                    If pMode = "Change" Then
+                        aTSAP_NetworkData = New TSAP_NetworkChgData(aPar, aIntPar)
+                    Else
+                        aTSAP_NetworkData = New TSAP_NetworkData(aPar, aIntPar)
+                    End If
                     If aTSAP_NetworkData.fillNetworkinfo(aItems) Then
                         ' check if we should dump this document
                         If aObjNr = aDumpObjNr Then
@@ -143,10 +152,10 @@
                             log.Debug("SapPsMdRibbonNetwork.exec - " & "aSAPNetworkPI.createSingle returned, aRetStr=" & aRetStr)
                             aDws.Cells(i, aMsgClmnNr) = CStr(aRetStr)
                         ElseIf pMode = "Change" Then
-                            ' log.Debug("SapPsMdRibbonNetwork.exec - " & "calling aSAPNetworkPI.change")
-                            ' aRetStr = aSAPNetworkPI.change(aTSAP_CCData)
-                            ' log.Debug("SapPsMdRibbonNetwork.exec - " & "aSAPNetworkPI.change returned, aRetStr=" & aRetStr)
-                            ' aDws.Cells(i, aMsgClmnNr) = CStr(aRetStr)
+                            log.Debug("SapPsMdRibbonNetwork.exec - " & "calling aSAPNetworkPI.change")
+                            aRetStr = aSAPNetworkPI.change(aTSAP_NetworkData)
+                            log.Debug("SapPsMdRibbonNetwork.exec - " & "aSAPNetworkPI.change returned, aRetStr=" & aRetStr)
+                            aDws.Cells(i, aMsgClmnNr) = CStr(aRetStr)
                         End If
                     Else
                         log.Warn("SapPsMdRibbonNetwork.exec - " & "filling Networkinfo in aTSAP_NetworkData failed!")
@@ -252,7 +261,7 @@
                     Dim aNextNetwork As String = nextNetwork(aDws, i, aMsgClmnNr, aNetwClmnNr, aOKMsg)
                     If aNetwork <> aNextNetwork Then
                         Dim aTSAP_NWAData As New TSAP_NWAData(aPar, aIntPar)
-                        If aTSAP_NWAData.fillHeader(aItems) And aTSAP_NWAData.fillData(aItems) Then
+                        If aTSAP_NWAData.fillHeader(aItems) And aTSAP_NWAData.fillData(aItems, pMode) Then
                             ' check if we should dump this document
                             If aObjNr = aDumpObjNr Then
                                 log.Debug("SapPsMdRibbonNetwork.execNWA - " & "dumping Object Nr " & CStr(aObjNr))
@@ -271,10 +280,14 @@
                                     aDws.Cells(CInt(aKeyPair(1)), aMsgClmnNr) = CStr(aRetStr)
                                 Next
                             ElseIf pMode = "Change" Then
-                                ' log.Debug("SapPsMdRibbonNetwork.execNWA - " & "calling aSAPNetworkPI.actChangeMultiple")
-                                ' aRetStr = aSAPNetworkPI.actChangeMultiple(aTSAP_CCData)
-                                ' log.Debug("SapPsMdRibbonNetwork.execNWA - " & "aSAPNetworkPI.actChangeMultiple returned, aRetStr=" & aRetStr)
-                                ' aDws.Cells(i, aMsgClmnNr) = CStr(aRetStr)
+                                log.Debug("SapPsMdRibbonNetwork.execNWA - " & "calling aSAPNetworkPI.actChangeMultiple")
+                                aRetStr = aSAPNetworkPI.actChangeMultiple(aTSAP_NWAData)
+                                log.Debug("SapPsMdRibbonNetwork.execNWA - " & "aSAPNetworkPI.actChangeMultiple returned, aRetStr=" & aRetStr)
+                                For Each aKey In aItems.aTDataDic.Keys
+                                    Dim aKeyPair() As String
+                                    aKeyPair = Split(aKey, "-")
+                                    aDws.Cells(CInt(aKeyPair(1)), aMsgClmnNr) = CStr(aRetStr)
+                                Next
                             End If
                         Else
                             log.Warn("SapPsMdRibbonNetwork.execNWA - " & "Filling Header or Data in aTSAP_NWAData failed!")
@@ -381,7 +394,7 @@
                     Dim aNextNetwork As String = nextNetwork(aDws, i, aMsgClmnNr, aNetwClmnNr, aOKMsg)
                     If aNetwork <> aNextNetwork Then
                         Dim aTSAP_NWAEData As New TSAP_NWAEData(aPar, aIntPar)
-                        If aTSAP_NWAEData.fillHeader(aItems) And aTSAP_NWAEData.fillData(aItems) Then
+                        If aTSAP_NWAEData.fillHeader(aItems) And aTSAP_NWAEData.fillData(aItems, pMode) Then
                             ' check if we should dump this document
                             If aObjNr = aDumpObjNr Then
                                 log.Debug("SapPsMdRibbonNetwork.execNWAE - " & "dumping Object Nr " & CStr(aObjNr))
@@ -400,10 +413,15 @@
                                     aDws.Cells(CInt(aKeyPair(1)), aMsgClmnNr) = CStr(aRetStr)
                                 Next
                             ElseIf pMode = "Change" Then
-                                ' log.Debug("SapPsMdRibbonNetwork.execNWAE - " & "calling aSAPNetworkPI.actChangeMultiple")
-                                ' aRetStr = aSAPNetworkPI.actChangeMultiple(aTSAP_CCData)
-                                ' log.Debug("SapPsMdRibbonNetwork.execNWAE - " & "aSAPNetworkPI.actChangeMultiple returned, aRetStr=" & aRetStr)
-                                ' aDws.Cells(i, aMsgClmnNr) = CStr(aRetStr)
+                                log.Debug("SapPsMdRibbonNetwork.execNWAE - " & "calling aSAPNetworkPI.actChangeMultiple")
+                                aRetStr = aSAPNetworkPI.actElemChangeMultiple(aTSAP_NWAEData)
+                                log.Debug("SapPsMdRibbonNetwork.execNWAE - " & "aSAPNetworkPI.actElemChangeMultiple returned, aRetStr=" & aRetStr)
+                                ' message has to be written in all lines that where processed in items
+                                For Each aKey In aItems.aTDataDic.Keys
+                                    Dim aKeyPair() As String
+                                    aKeyPair = Split(aKey, "-")
+                                    aDws.Cells(CInt(aKeyPair(1)), aMsgClmnNr) = CStr(aRetStr)
+                                Next
                             End If
                         Else
                             log.Warn("SapPsMdRibbonNetwork.execNWAE - " & "Filling Header or Data in aTSAP_NWAEData failed!")
@@ -510,7 +528,7 @@
                     Dim aNextNetwork As String = nextNetwork(aDws, i, aMsgClmnNr, aNetwClmnNr, aOKMsg)
                     If aNetwork <> aNextNetwork Then
                         Dim aTSAP_CompData As New TSAP_CompData(aPar, aIntPar)
-                        If aTSAP_CompData.fillHeader(aItems) And aTSAP_CompData.fillData(aItems) Then
+                        If aTSAP_CompData.fillHeader(aItems) And aTSAP_CompData.fillData(aItems, pMode) Then
                             ' check if we should dump this document
                             If aObjNr = aDumpObjNr Then
                                 log.Debug("SapPsMdRibbonNetwork.execCOMP - " & "dumping Object Nr " & CStr(aObjNr))
@@ -529,10 +547,15 @@
                                     aDws.Cells(CInt(aKeyPair(1)), aMsgClmnNr) = CStr(aRetStr)
                                 Next
                             ElseIf pMode = "Change" Then
-                                ' log.Debug("SapPsMdRibbonNetwork.execCOMP - " & "calling aSAPNetworkPI.changeComponent")
-                                ' aRetStr = aSAPNetworkPI.changeComponent(aTSAP_CompData)
-                                ' log.Debug("SapPsMdRibbonNetwork.execCOMP - " & "aSAPNetworkPI.changeComponent returned, aRetStr=" & aRetStr)
-                                ' aDws.Cells(i, aMsgClmnNr) = CStr(aRetStr)
+                                log.Debug("SapPsMdRibbonNetwork.execCOMP - " & "calling aSAPNetworkPI.changeComponent")
+                                aRetStr = aSAPNetworkPI.changeComponent(aTSAP_CompData)
+                                log.Debug("SapPsMdRibbonNetwork.execCOMP - " & "aSAPNetworkPI.changeComponent returned, aRetStr=" & aRetStr)
+                                ' message has to be written in all lines that where processed in items
+                                For Each aKey In aItems.aTDataDic.Keys
+                                    Dim aKeyPair() As String
+                                    aKeyPair = Split(aKey, "-")
+                                    aDws.Cells(CInt(aKeyPair(1)), aMsgClmnNr) = CStr(aRetStr)
+                                Next
                             End If
                         Else
                             log.Warn("SapPsMdRibbonNetwork.execCOMP - " & "Filling Header or Data in aTSAP_CompData failed!")

@@ -69,14 +69,14 @@ Public Class SAPWBSPI
             Dim oEXTENSIONINAppended As Boolean = False
             For Each aKvP In pData.aExt.aTDataDic
                 aTDataRec = aKvP.Value
-                Dim aCustFields As Object
+                Dim aCustFields As IEnumerable(Of String)
                 aCustFields = fillCustomerFields(aTDataRec)
                 oEXTENSIONIN.Append()
                 oEXTENSIONIN.SetValue("STRUCTURE", "BAPI_TE_WBS_ELEMENT")
-                oEXTENSIONIN.SetValue("VALUEPART1", aCustFields(0))
-                oEXTENSIONIN.SetValue("VALUEPART2", aCustFields(1))
-                oEXTENSIONIN.SetValue("VALUEPART3", aCustFields(2))
-                oEXTENSIONIN.SetValue("VALUEPART4", aCustFields(3))
+                oEXTENSIONIN.SetValue("VALUEPART1", aCustFields.ElementAt(0))
+                oEXTENSIONIN.SetValue("VALUEPART2", aCustFields.ElementAt(1))
+                oEXTENSIONIN.SetValue("VALUEPART3", aCustFields.ElementAt(2))
+                oEXTENSIONIN.SetValue("VALUEPART4", aCustFields.ElementAt(3))
             Next
             ' call the BAPI
             oRfcFunction.Invoke(destination)
@@ -109,40 +109,111 @@ Public Class SAPWBSPI
         End Try
     End Function
 
-    ' TBD: This Function needs to be reimplemented !!!
-    Function fillCustomerFields(pExtInfo As TDataRec) As Object
-        Dim aArray(3) As String
-        Dim aRetArray As Object
-        Dim aSAPFormat As New SAPFormat(aIntPar)
-        ' WBS
-        aRetArray = fillEXTENSIONIN(aArray, aSAPFormat.pspid(pExtInfo.getWbs, 18), 0, 1, 24, True)
+    Public Function changeMultiple(pData As TSAP_WbsChgData, Optional pOKMsg As String = "OK") As String
+        changeMultiple = ""
+        Try
+            oRfcFunction = destination.Repository.CreateFunction("BAPI_BUS2054_CHANGE_MULTI")
+            RfcSessionManager.BeginContext(destination)
+            Dim oRETURN As IRfcTable = oRfcFunction.GetTable("ET_RETURN")
+            Dim oIT_WBS_ELEMENT As IRfcTable = oRfcFunction.GetTable("IT_WBS_ELEMENT")
+            Dim oIT_UPDATE_WBS_ELEMENT As IRfcTable = oRfcFunction.GetTable("IT_UPDATE_WBS_ELEMENT")
+            Dim oEXTENSIONIN As IRfcTable = oRfcFunction.GetTable("EXTENSIONIN")
+            oRETURN.Clear()
+            oIT_WBS_ELEMENT.Clear()
+            oIT_UPDATE_WBS_ELEMENT.Clear()
+            oEXTENSIONIN.Clear()
 
-        aRetArray = fillEXTENSIONIN(aRetArray, pExtInfo.getWbsZZ_REL("1"), 0, 25, 12, False)
-        aRetArray = fillEXTENSIONIN(aRetArray, pExtInfo.getWbsZZ_REL("2"), 0, 37, 12, False)
-        aRetArray = fillEXTENSIONIN(aRetArray, pExtInfo.getWbsZZ_REL("3"), 0, 49, 12, False)
-        aRetArray = fillEXTENSIONIN(aRetArray, pExtInfo.getWbsZZ_REL("4"), 0, 61, 12, False)
+            Dim aSAPBapiPS As New SAPBapiPS(sapcon)
+            aSAPBapiPS.initialization()
 
-        fillCustomerFields = aRetArray
+            Dim aTStrRec As SAPCommon.TStrRec
+            Dim oStruc As IRfcStructure
+            ' set the header values
+            For Each aTStrRec In pData.aHdrRec.aTDataRecCol
+                If aTStrRec.Strucname <> "" Then
+                    oStruc = oRfcFunction.GetStructure(aTStrRec.Strucname)
+                    oStruc.SetValue(aTStrRec.Fieldname, aTStrRec.formated)
+                Else
+                    oRfcFunction.SetValue(aTStrRec.Fieldname, aTStrRec.formated)
+                End If
+            Next
+            ' set the data values
+            Dim aKvP As KeyValuePair(Of String, TDataRec)
+            Dim aTDataRec As TDataRec
+            For Each aKvP In pData.aData.aTDataDic
+                Dim oIT_WBS_ELEMENTAppended As Boolean = False
+                Dim oIT_UPDATE_WBS_ELEMENTAppended As Boolean = False
+                aTDataRec = aKvP.Value
+                For Each aTStrRec In aTDataRec.aTDataRecCol
+                    Select Case aTStrRec.Strucname
+                        Case "IT_WBS_ELEMENT"
+                            If Not oIT_WBS_ELEMENTAppended Then
+                                oIT_WBS_ELEMENT.Append()
+                                oIT_WBS_ELEMENTAppended = True
+                            End If
+                            oIT_WBS_ELEMENT.SetValue(aTStrRec.Fieldname, aTStrRec.formated())
+                        Case "IT_UPDATE_WBS_ELEMENT"
+                            If Not oIT_UPDATE_WBS_ELEMENTAppended Then
+                                oIT_UPDATE_WBS_ELEMENT.Append()
+                                oIT_UPDATE_WBS_ELEMENTAppended = True
+                            End If
+                            oIT_UPDATE_WBS_ELEMENT.SetValue(aTStrRec.Fieldname, aTStrRec.formated())
+                    End Select
+                Next
+            Next
+            ' Fill Extension fields
+            Dim oEXTENSIONINAppended As Boolean = False
+            For Each aKvP In pData.aExt.aTDataDic
+                aTDataRec = aKvP.Value
+                Dim aCustFields As IEnumerable(Of String)
+                aCustFields = fillCustomerFields(aTDataRec)
+                oEXTENSIONIN.Append()
+                oEXTENSIONIN.SetValue("STRUCTURE", "BAPI_TE_WBS_ELEMENT")
+                oEXTENSIONIN.SetValue("VALUEPART1", aCustFields.ElementAt(0))
+                oEXTENSIONIN.SetValue("VALUEPART2", aCustFields.ElementAt(1))
+                oEXTENSIONIN.SetValue("VALUEPART3", aCustFields.ElementAt(2))
+                oEXTENSIONIN.SetValue("VALUEPART4", aCustFields.ElementAt(3))
+            Next
+            ' call the BAPI
+            oRfcFunction.Invoke(destination)
+            Dim aErr As Boolean = False
+            Dim aPreComErr As Boolean = False
+            For i As Integer = 0 To oRETURN.Count - 1
+                changeMultiple = changeMultiple & ";" & oRETURN(i).GetValue("MESSAGE")
+                If oRETURN(i).GetValue("TYPE") <> "S" And oRETURN(i).GetValue("TYPE") <> "I" And oRETURN(i).GetValue("TYPE") <> "W" Then
+                    aErr = True
+                End If
+            Next i
+            If aErr = False Then
+                Dim aPreCommitRet As String
+                aPreCommitRet = aSAPBapiPS.precommit
+                If aPreCommitRet <> "" Then
+                    changeMultiple = changeMultiple & ";" & aPreCommitRet
+                    If Left(aPreCommitRet, 6) = "Error:" Then
+                        aPreComErr = True
+                    End If
+                End If
+                Dim aSAPBapiTranctionCommit As New SAPBapiTranctionCommit(sapcon)
+                aSAPBapiTranctionCommit.commit(pWait:="X")
+            End If
+            changeMultiple = If(changeMultiple = "", pOKMsg, If(aPreComErr = False And aErr = False, pOKMsg & changeMultiple, "Error" & changeMultiple))
+        Catch Ex As System.Exception
+            MsgBox("Error: Exception " & Ex.Message, MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "SAPWBSPI")
+            changeMultiple = "Error: Exception in changeMultiple"
+        Finally
+            RfcSessionManager.EndContext(destination)
+        End Try
     End Function
 
-    Function fillEXTENSIONIN(pArray As Object, pValue As String, pInd As Integer, pStart As Integer, pLen As Integer, pClear As Boolean) As Object
-        Dim aArray(3) As String
-        Dim eStr As String
-        Dim tmpStr As String
-        eStr = "                                                                                                                                                                                                                                                "
-        For i = 0 To 3
-            If pClear = True Then
-                aArray(i) = eStr
-            Else
-                aArray(i) = pArray(i)
-            End If
-        Next i
-        tmpStr = Left(aArray(pInd), pStart - 1)
-        tmpStr = tmpStr & pValue
-        tmpStr = tmpStr & Left(eStr, pLen - Len(pValue))
-        tmpStr = tmpStr & Right(aArray(pInd), Len(aArray(pInd)) - Len(tmpStr))
-        aArray(pInd) = tmpStr
-        fillEXTENSIONIN = aArray
+    Function fillCustomerFields(pExtInfo As TDataRec) As IEnumerable(Of String)
+        Dim aSAPFormat As New SAPFormat(aIntPar)
+        Dim aExtension As New SAPCommon.SapExtension(aIntPar)
+        Dim aTStrRec As SAPCommon.TStrRec
+        For Each aTStrRec In pExtInfo.aTDataRecCol
+            aExtension.addField(aTStrRec)
+        Next
+        aExtension.addString(aSAPFormat.pspid(pExtInfo.getWbs, 18), 0, 24)
+        fillCustomerFields = aExtension.getArray()
     End Function
 
     Public Function createSettlementRule(pData As TSAP_WbsSettleData, Optional pOKMsg As String = "OK") As String

@@ -1,20 +1,33 @@
-﻿Public Class TSAP_CompData
+﻿' Copyright 2020 Hermann Mundprecht
+' This file is licensed under the terms of the license 'CC BY 4.0'. 
+' For a human readable version of the license, see https://creativecommons.org/licenses/by/4.0/
+
+Public Class TSAP_CompData
 
     Public aHdrRec As TDataRec
     Public aData As TData
 
     Private Hd_Fields() As String = {"NUMBER"}
     Private Data_Fields() As String = {"ACTIVITY", "TYPE_OF_PUR_RESV", "ITEM_NUMBER", "MATERIAL", "PLANT", "ENTRY_QUANTITY", "BASE_UOM", "BASE_UOM_ISO", "ITEM_CAT", "ITEM_TEXT", "MRP_RELEVANT", "REQ_DATE", "MANUAL_REQUIREMENTS_DATE", "LEAD_TIME_OFFSET_OPR", "LEAD_TIME_OFFSET_OPR_UNIT", "LEAD_TIME_OFFSET_OPR_UNIT_ISO", "MRP_DISTRIBUTION_KEY", "COST_RELEVANT", "STGE_LOC", "BATCH", "BOMEXPL_NO", "DELIVERY_DAYS", "PUR_GROUP", "PURCH_ORG", "INFO_REC", "PRICE", "PRICE_UNIT", "CURRENCY", "CURRENCY_ISO", "PUR_INFO_RECORD_DATA_FIXED", "AGREEMENT", "AGMT_ITEM", "GL_ACCOUNT", "VENDOR_NO", "GR_PR_TIME", "MATL_GROUP", "PREQ_NAME", "GR_RCPT", "TRACKINGNO", "UNLOAD_PT", "SORT_STRING", "BACKFLUSH", "BULK_MAT", "VSI_SIZE1", "VSI_SIZE2", "VSI_SIZE3", "VSI_SIZE_UNIT", "VSI_SIZE_UNIT_ISO", "VSI_QTY", "VAR_SIZE_COMP_MEASURE_UNIT", "VAR_SIZE_COMP_MEASURE_UNIT_ISO", "VSI_FORMULA", "VSI_NO", "ORIGINAL_QUANTITY", "ADDR_NO", "ADDR_NO2", "SUPP_VENDOR", "CUSTOMER", "WBS_ELEMENT", "S_ORD_ITEM", "MATERIAL_EXTERNAL", "MATERIAL_GUID", "MATERIAL_VERSION", "MATERIAL_LONG"}
+    Private Data_Fields_Chg() As String = {"COMPONENT", "ACTIVITY", "ITEM_NUMBER", "ENTRY_QUANTITY", "BASE_UOM", "BASE_UOM_ISO", "ITEM_TEXT", "MRP_RELEVANT", "REQ_DATE", "MANUAL_REQUIREMENTS_DATE", "LEAD_TIME_OFFSET_OPR", "LEAD_TIME_OFFSET_OPR_UNIT", "LEAD_TIME_OFFSET_OPR_UNIT_ISO", "MRP_DISTRIBUTION_KEY", "COST_RELEVANT", "STGE_LOC", "BATCH", "BOMEXPL_NO", "DELIVERY_DAYS", "PUR_GROUP", "PURCH_ORG", "INFO_REC", "PRICE", "PRICE_UNIT", "CURRENCY", "CURRENCY_ISO", "PUR_INFO_RECORD_DATA_FIXED", "AGREEMENT", "AGMT_ITEM", "GL_ACCOUNT", "VENDOR_NO", "GR_PR_TIME", "MATL_GROUP", "PREQ_NAME", "GR_RCPT", "TRACKINGNO", "UNLOAD_PT", "SORT_STRING", "BACKFLUSH", "WITHDRAWN", "BULK_MAT", "VSI_SIZE1", "VSI_SIZE2", "VSI_SIZE3", "VSI_SIZE_UNIT", "VSI_SIZE_UNIT_ISO", "VSI_QTY", "VAR_SIZE_COMP_MEASURE_UNIT", "VAR_SIZE_COMP_MEASURE_UNIT_ISO", "VSI_FORMULA", "VSI_NO", "ORIGINAL_QUANTITY", "ADDR_NO", "ADDR_NO2", "SUPP_VENDOR", "CUSTOMER", "WBS_ELEMENT", "S_ORD_ITEM"}
+    Private Data_Fields_Upd() As String = {"COMPONENT", "ACTIVITY", "ITEM_NUMBER", "ENTRY_QUANTITY", "CHANGE_NOMNG", "BASE_UOM", "BASE_UOM_ISO", "ITEM_TEXT", "MRP_RELEVANT", "REQ_DATE", "MANUAL_REQUIREMENTS_DATE", "LEAD_TIME_OFFSET_OPR", "LEAD_TIME_OFFSET_OPR_UNIT", "LEAD_TIME_OFFSET_OPR_UNIT_ISO", "MRP_DISTRIBUTION_KEY", "COST_RELEVANT", "STGE_LOC", "BATCH", "BOMEXPL_NO", "DELIVERY_DAYS", "PUR_GROUP", "PURCH_ORG", "INFO_REC", "PRICE", "PRICE_UNIT", "CURRENCY", "CURRENCY_ISO", "PUR_INFO_RECORD_DATA_FIXED", "AGREEMENT", "AGMT_ITEM", "GL_ACCOUNT", "VENDOR_NO", "GR_PR_TIME", "MATL_GROUP", "PREQ_NAME", "GR_RCPT", "TRACKINGNO", "UNLOAD_PT", "SORT_STRING", "BACKFLUSH", "WITHDRAWN", "BULK_MAT", "VSI_SIZE1", "VSI_SIZE2", "VSI_SIZE3", "VSI_SIZE_UNIT", "VSI_SIZE_UNIT_ISO", "VSI_QTY", "VAR_SIZE_COMP_MEASURE_UNIT", "VAR_SIZE_COMP_MEASURE_UNIT_ISO", "VSI_FORMULA", "VSI_NO", "ORIGINAL_QUANTITY", "ADDR_NO", "ADDR_NO2", "SUPP_VENDOR", "CUSTOMER", "WBS_ELEMENT", "S_ORD_ITEM"}
 
     Private aPar As SAPCommon.TStr
     Private aIntPar As SAPCommon.TStr
     Private Shared ReadOnly log As log4net.ILog = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType)
 
-    Private Const sWbs As String = "I_COMPONENTS_ADD"
+    Private aUseAsEmpty As String = "#"
+
+    Private aNumber As String
+
+    Private Const sComponent As String = "I_COMPONENTS_ADD"
+    Private Const sComponent_Chg As String = "I_COMPONENTS_CHANGE"
+    Private Const sComponent_Upd As String = "I_COMPONENTS_CHANGE_UPDATE"
 
     Public Sub New(ByRef pPar As SAPCommon.TStr, ByRef pIntPar As SAPCommon.TStr)
         aPar = pPar
         aIntPar = pIntPar
+        aUseAsEmpty = If(aIntPar.value("GEN", "USEASEMPTY") <> "", aIntPar.value("GEN", "USEASEMPTY"), "#")
     End Sub
 
     Public Function fillHeader(pData As TData) As Boolean
@@ -26,15 +39,16 @@
         If Not IsNothing(aPostRec) Then
             For Each aTStrRec In aPostRec.aTDataRecCol
                 If valid_Hdr_Field(aTStrRec) Then
-                    aNewHdrRec.setValues(aTStrRec.getKey(), aTStrRec.Value, aTStrRec.Currency, aTStrRec.Format)
+                    aNewHdrRec.setValues(aTStrRec.getKey(), aTStrRec.Value, aTStrRec.Currency, aTStrRec.Format, pUseAsEmpty:=aUseAsEmpty)
                 End If
             Next
         End If
         aHdrRec = aNewHdrRec
+        aNumber = getNetwork()
         fillHeader = True
     End Function
 
-    Public Function fillData(pData As TData) As Boolean
+    Public Function fillData(pData As TData, Optional pMode As String = "Create") As Boolean
         Dim aKvB As KeyValuePair(Of String, TDataRec)
         Dim aTDataRec As TDataRec
         Dim aTStrRec As SAPCommon.TStrRec
@@ -46,8 +60,22 @@
             aTDataRec = aKvB.Value
             ' add the valid WBS fields
             For Each aTStrRec In aTDataRec.aTDataRecCol
-                If valid_Data_Field(aTStrRec) Then
-                    aData.addValue(CStr(aCnt), aTStrRec, pNewStrucname:=sWbs)
+                If pMode = "Create" Then
+                    If valid_Data_Field(aTStrRec) Then
+                        aData.addValue(CStr(aCnt), aTStrRec, pNewStrucname:=sComponent, pUseAsEmpty:=aUseAsEmpty)
+                    End If
+                ElseIf pMode = "Change" Then
+                    ' get the list of existing components for the activity
+                    If valid_Data_Field_Chg(aTStrRec) Then
+                        aData.addValue(CStr(aCnt), aTStrRec, pNewStrucname:=sComponent_Chg, pUseAsEmpty:=aUseAsEmpty)
+                    End If
+                    If valid_Data_Field_Upd(aTStrRec) Then
+                        If aTStrRec.Fieldname = "COMPONENT" Then
+                            aData.addValue(CStr(aCnt), aTStrRec, pNewStrucname:=sComponent_Upd, pUseAsEmpty:=aUseAsEmpty)
+                        Else
+                            aData.addValue(CStr(aCnt), sComponent_Upd & "-" & aTStrRec.Fieldname, "X", "", "", pUseAsEmpty:=aUseAsEmpty)
+                        End If
+                    End If
                 End If
             Next
             aCnt += 1
@@ -68,8 +96,26 @@
         End If
     End Function
 
+    Public Function valid_Data_Field_Chg(pTStrRec As SAPCommon.TStrRec) As Boolean
+        valid_Data_Field_Chg = False
+        If pTStrRec.Strucname = "I_COMPONENTS_ADD" Or pTStrRec.Strucname = "COMP" Then
+            valid_Data_Field_Chg = isInArray(pTStrRec.Fieldname, Data_Fields_Chg)
+        End If
+    End Function
+
+    Public Function valid_Data_Field_Upd(pTStrRec As SAPCommon.TStrRec) As Boolean
+        valid_Data_Field_Upd = False
+        If pTStrRec.Strucname = "I_COMPONENTS_ADD" Or pTStrRec.Strucname = "COMP" Then
+            valid_Data_Field_Upd = isInArray(pTStrRec.Fieldname, Data_Fields_Upd)
+        End If
+    End Function
+
     Private Function isInArray(pString As String, pArray As Object) As Boolean
-        isInArray = (UBound(Filter(pArray, pString)) > -1)
+        Dim st As String, M As String
+        M = "$"
+        st = M & Join(pArray, M) & M
+        isInArray = InStr(st, M & pString & M) > 0
+        ' isInArray = (UBound(Filter(pArray, pString)) > -1)
     End Function
 
     Public Function getNetwork() As String

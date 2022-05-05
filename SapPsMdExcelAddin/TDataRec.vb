@@ -1,4 +1,8 @@
-﻿Public Class TDataRec
+﻿' Copyright 2020 Hermann Mundprecht
+' This file is licensed under the terms of the license 'CC BY 4.0'. 
+' For a human readable version of the license, see https://creativecommons.org/licenses/by/4.0/
+
+Public Class TDataRec
 
     Public aTDataRecCol As Collection
     Private aIntPar As SAPCommon.TStr
@@ -9,16 +13,23 @@
     End Sub
 
     Public Sub setValues(pNAME As String, pVALUE As String, pCURRENCY As String, pFORMAT As String,
-                         Optional pEmty As Boolean = False, Optional pEmptyChar As String = "#", Optional pOperation As String = "set")
+                         Optional pEmty As Boolean = False, Optional pEmptyChar As String = "#", Optional pOperation As String = "set", Optional pUseAsEmpty As String = "#")
         Dim aTStrRec As SAPCommon.TStrRec
         Dim aNameArray() As String
         Dim aKey As String
         Dim aSTRUCNAME As String = ""
         Dim aFIELDNAME As String = ""
-        ' do not add empty values
-        If Not pEmty And pVALUE = pEmptyChar Then
-            Exit Sub
+        Dim aValue As String
+        If pVALUE = pUseAsEmpty Then
+            aValue = " "
+        Else
+            aValue = pVALUE
+            If Not pEmty And aValue = pEmptyChar Then
+                Exit Sub
+            End If
         End If
+        ' do not add empty values
+
         If InStr(pNAME, "-") <> 0 Then
             aNameArray = Split(pNAME, "-")
             aSTRUCNAME = aNameArray(0)
@@ -32,19 +43,19 @@
             aTStrRec = aTDataRecCol(aKey)
             Select Case pOperation
                 Case "add"
-                    aTStrRec.addValues(aSTRUCNAME, aFIELDNAME, pVALUE, pCURRENCY, pFORMAT)
+                    aTStrRec.addValues(aSTRUCNAME, aFIELDNAME, aValue, pCURRENCY, pFORMAT)
                 Case "sub"
-                    aTStrRec.subValues(aSTRUCNAME, aFIELDNAME, pVALUE, pCURRENCY, pFORMAT)
+                    aTStrRec.subValues(aSTRUCNAME, aFIELDNAME, aValue, pCURRENCY, pFORMAT)
                 Case "mul"
-                    aTStrRec.mulValues(aSTRUCNAME, aFIELDNAME, pVALUE, pCURRENCY, pFORMAT)
+                    aTStrRec.mulValues(aSTRUCNAME, aFIELDNAME, aValue, pCURRENCY, pFORMAT)
                 Case "div"
-                    aTStrRec.divValues(aSTRUCNAME, aFIELDNAME, pVALUE, pCURRENCY, pFORMAT)
+                    aTStrRec.divValues(aSTRUCNAME, aFIELDNAME, aValue, pCURRENCY, pFORMAT)
                 Case Else
-                    aTStrRec.setValues(aSTRUCNAME, aFIELDNAME, pVALUE, pCURRENCY, pFORMAT)
+                    aTStrRec.setValues(aSTRUCNAME, aFIELDNAME, aValue, pCURRENCY, pFORMAT)
             End Select
         Else
             aTStrRec = New SAPCommon.TStrRec
-            aTStrRec.setValues(aSTRUCNAME, aFIELDNAME, pVALUE, pCURRENCY, pFORMAT)
+            aTStrRec.setValues(aSTRUCNAME, aFIELDNAME, aValue, pCURRENCY, pFORMAT)
             aTDataRecCol.Add(aTStrRec, aKey)
         End If
     End Sub

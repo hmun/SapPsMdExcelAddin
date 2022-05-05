@@ -1,4 +1,8 @@
-﻿Public Class TData
+﻿' Copyright 2020 Hermann Mundprecht
+' This file is licensed under the terms of the license 'CC BY 4.0'. 
+' For a human readable version of the license, see https://creativecommons.org/licenses/by/4.0/
+
+Public Class TData
 
     Public aTDataDic As Dictionary(Of String, TDataRec)
     Private aIntPar As SAPCommon.TStr
@@ -9,21 +13,21 @@
     End Sub
 
     Public Sub addValue(pKey As String, pNAME As String, pVALUE As String, pCURRENCY As String, pFORMAT As String,
-                        Optional pEmty As Boolean = False, Optional pEmptyChar As String = "#", Optional pOperation As String = "set")
+                        Optional pEmty As Boolean = False, Optional pEmptyChar As String = "#", Optional pOperation As String = "set", Optional pUseAsEmpty As String = "#")
         Dim aTDataRec As TDataRec
         If aTDataDic.ContainsKey(pKey) Then
             aTDataRec = aTDataDic(pKey)
-            aTDataRec.setValues(pNAME, pVALUE, pCURRENCY, pFORMAT, pEmty, pEmptyChar, pOperation)
+            aTDataRec.setValues(pNAME, pVALUE, pCURRENCY, pFORMAT, pEmty, pEmptyChar, pOperation, pUseAsEmpty)
         Else
             aTDataRec = New TDataRec(aIntPar)
-            aTDataRec.setValues(pNAME, pVALUE, pCURRENCY, pFORMAT, pEmty, pEmptyChar, pOperation)
+            aTDataRec.setValues(pNAME, pVALUE, pCURRENCY, pFORMAT, pEmty, pEmptyChar, pOperation, pUseAsEmpty)
             aTDataDic.Add(pKey, aTDataRec)
         End If
     End Sub
 
     Public Sub addValue(pKey As String, pTStrRec As SAPCommon.TStrRec,
                         Optional pEmty As Boolean = False, Optional pEmptyChar As String = "#", Optional pOperation As String = "set",
-                        Optional pNewStrucname As String = "")
+                        Optional pNewStrucname As String = "", Optional pUseAsEmpty As String = "#")
         Dim aTDataRec As TDataRec
         Dim aName As String
         If pNewStrucname <> "" Then
@@ -33,10 +37,10 @@
         End If
         If aTDataDic.ContainsKey(pKey) Then
             aTDataRec = aTDataDic(pKey)
-            aTDataRec.setValues(aName, pTStrRec.Value, pTStrRec.Currency, pTStrRec.Format, pEmty, pEmptyChar, pOperation)
+            aTDataRec.setValues(aName, pTStrRec.Value, pTStrRec.Currency, pTStrRec.Format, pEmty, pEmptyChar, pOperation, pUseAsEmpty)
         Else
             aTDataRec = New TDataRec(aIntPar)
-            aTDataRec.setValues(aName, pTStrRec.Value, pTStrRec.Currency, pTStrRec.Format, pEmty, pEmptyChar, pOperation)
+            aTDataRec.setValues(aName, pTStrRec.Value, pTStrRec.Currency, pTStrRec.Format, pEmty, pEmptyChar, pOperation, pUseAsEmpty)
             aTDataDic.Add(pKey, aTDataRec)
         End If
     End Sub

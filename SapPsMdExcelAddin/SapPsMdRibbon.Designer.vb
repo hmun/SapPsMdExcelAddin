@@ -50,16 +50,26 @@
         Me.SAPProject = Me.Factory.CreateRibbonGroup
         Me.ButtonProjectCreate = Me.Factory.CreateRibbonButton
         Me.ButtonWbsCreate = Me.Factory.CreateRibbonButton
+        Me.ButtonWbsCreateSingleMode = Me.Factory.CreateRibbonButton
+        Me.ButtonWbsSettlementCreate = Me.Factory.CreateRibbonButton
+        Me.Separator2 = Me.Factory.CreateRibbonSeparator
+        Me.ButtonProjectChange = Me.Factory.CreateRibbonButton
+        Me.ButtonWbsChange = Me.Factory.CreateRibbonButton
         Me.SAPNetwork = Me.Factory.CreateRibbonGroup
         Me.ButtonNetworkCreate = Me.Factory.CreateRibbonButton
         Me.ButtonNWACreate = Me.Factory.CreateRibbonButton
         Me.Separator1 = Me.Factory.CreateRibbonSeparator
         Me.ButtonNWAECreate = Me.Factory.CreateRibbonButton
         Me.ButtonCompCreate = Me.Factory.CreateRibbonButton
+        Me.Separator3 = Me.Factory.CreateRibbonSeparator
+        Me.ButtonNetworkChange = Me.Factory.CreateRibbonButton
+        Me.ButtonNWAChange = Me.Factory.CreateRibbonButton
+        Me.ButtonNWAEChange = Me.Factory.CreateRibbonButton
         Me.SapPsMdLogon = Me.Factory.CreateRibbonGroup
         Me.ButtonLogon = Me.Factory.CreateRibbonButton
         Me.ButtonLogoff = Me.Factory.CreateRibbonButton
-        Me.ButtonWbsSettlementCreate = Me.Factory.CreateRibbonButton
+        Me.ButtonCompChange = Me.Factory.CreateRibbonButton
+        Me.Separator4 = Me.Factory.CreateRibbonSeparator
         Me.SapPsMd.SuspendLayout()
         Me.Group1.SuspendLayout()
         Me.SAPProject.SuspendLayout()
@@ -109,7 +119,11 @@
         '
         Me.SAPProject.Items.Add(Me.ButtonProjectCreate)
         Me.SAPProject.Items.Add(Me.ButtonWbsCreate)
+        Me.SAPProject.Items.Add(Me.ButtonWbsCreateSingleMode)
         Me.SAPProject.Items.Add(Me.ButtonWbsSettlementCreate)
+        Me.SAPProject.Items.Add(Me.Separator2)
+        Me.SAPProject.Items.Add(Me.ButtonProjectChange)
+        Me.SAPProject.Items.Add(Me.ButtonWbsChange)
         Me.SAPProject.Label = "PS Project"
         Me.SAPProject.Name = "SAPProject"
         '
@@ -127,6 +141,39 @@
         Me.ButtonWbsCreate.Name = "ButtonWbsCreate"
         Me.ButtonWbsCreate.ShowImage = True
         '
+        'ButtonWbsCreateSingleMode
+        '
+        Me.ButtonWbsCreateSingleMode.Description = "Create WBS (single mode)"
+        Me.ButtonWbsCreateSingleMode.Image = CType(resources.GetObject("ButtonWbsCreateSingleMode.Image"), System.Drawing.Image)
+        Me.ButtonWbsCreateSingleMode.Label = "Create WBS (single mode)"
+        Me.ButtonWbsCreateSingleMode.Name = "ButtonWbsCreateSingleMode"
+        Me.ButtonWbsCreateSingleMode.ShowImage = True
+        '
+        'ButtonWbsSettlementCreate
+        '
+        Me.ButtonWbsSettlementCreate.Image = CType(resources.GetObject("ButtonWbsSettlementCreate.Image"), System.Drawing.Image)
+        Me.ButtonWbsSettlementCreate.Label = "Create WBS Settlement"
+        Me.ButtonWbsSettlementCreate.Name = "ButtonWbsSettlementCreate"
+        Me.ButtonWbsSettlementCreate.ShowImage = True
+        '
+        'Separator2
+        '
+        Me.Separator2.Name = "Separator2"
+        '
+        'ButtonProjectChange
+        '
+        Me.ButtonProjectChange.Image = CType(resources.GetObject("ButtonProjectChange.Image"), System.Drawing.Image)
+        Me.ButtonProjectChange.Label = "Change Project"
+        Me.ButtonProjectChange.Name = "ButtonProjectChange"
+        Me.ButtonProjectChange.ShowImage = True
+        '
+        'ButtonWbsChange
+        '
+        Me.ButtonWbsChange.Image = CType(resources.GetObject("ButtonWbsChange.Image"), System.Drawing.Image)
+        Me.ButtonWbsChange.Label = "Change WBS"
+        Me.ButtonWbsChange.Name = "ButtonWbsChange"
+        Me.ButtonWbsChange.ShowImage = True
+        '
         'SAPNetwork
         '
         Me.SAPNetwork.Items.Add(Me.ButtonNetworkCreate)
@@ -134,6 +181,12 @@
         Me.SAPNetwork.Items.Add(Me.Separator1)
         Me.SAPNetwork.Items.Add(Me.ButtonNWAECreate)
         Me.SAPNetwork.Items.Add(Me.ButtonCompCreate)
+        Me.SAPNetwork.Items.Add(Me.Separator3)
+        Me.SAPNetwork.Items.Add(Me.ButtonNetworkChange)
+        Me.SAPNetwork.Items.Add(Me.ButtonNWAChange)
+        Me.SAPNetwork.Items.Add(Me.Separator4)
+        Me.SAPNetwork.Items.Add(Me.ButtonNWAEChange)
+        Me.SAPNetwork.Items.Add(Me.ButtonCompChange)
         Me.SAPNetwork.Label = "PS Network"
         Me.SAPNetwork.Name = "SAPNetwork"
         '
@@ -147,7 +200,7 @@
         'ButtonNWACreate
         '
         Me.ButtonNWACreate.Image = CType(resources.GetObject("ButtonNWACreate.Image"), System.Drawing.Image)
-        Me.ButtonNWACreate.Label = "Create NetworkActivities"
+        Me.ButtonNWACreate.Label = "Create NWAs"
         Me.ButtonNWACreate.Name = "ButtonNWACreate"
         Me.ButtonNWACreate.ShowImage = True
         '
@@ -158,7 +211,7 @@
         'ButtonNWAECreate
         '
         Me.ButtonNWAECreate.Image = CType(resources.GetObject("ButtonNWAECreate.Image"), System.Drawing.Image)
-        Me.ButtonNWAECreate.Label = "Create NetwActElements"
+        Me.ButtonNWAECreate.Label = "Create NWA-Elements"
         Me.ButtonNWAECreate.Name = "ButtonNWAECreate"
         Me.ButtonNWAECreate.ShowImage = True
         '
@@ -168,6 +221,31 @@
         Me.ButtonCompCreate.Label = "Create Components"
         Me.ButtonCompCreate.Name = "ButtonCompCreate"
         Me.ButtonCompCreate.ShowImage = True
+        '
+        'Separator3
+        '
+        Me.Separator3.Name = "Separator3"
+        '
+        'ButtonNetworkChange
+        '
+        Me.ButtonNetworkChange.Image = CType(resources.GetObject("ButtonNetworkChange.Image"), System.Drawing.Image)
+        Me.ButtonNetworkChange.Label = "Change Network"
+        Me.ButtonNetworkChange.Name = "ButtonNetworkChange"
+        Me.ButtonNetworkChange.ShowImage = True
+        '
+        'ButtonNWAChange
+        '
+        Me.ButtonNWAChange.Image = CType(resources.GetObject("ButtonNWAChange.Image"), System.Drawing.Image)
+        Me.ButtonNWAChange.Label = "Change NWAs"
+        Me.ButtonNWAChange.Name = "ButtonNWAChange"
+        Me.ButtonNWAChange.ShowImage = True
+        '
+        'ButtonNWAEChange
+        '
+        Me.ButtonNWAEChange.Image = CType(resources.GetObject("ButtonNWAEChange.Image"), System.Drawing.Image)
+        Me.ButtonNWAEChange.Label = "Change NWA-Elements"
+        Me.ButtonNWAEChange.Name = "ButtonNWAEChange"
+        Me.ButtonNWAEChange.ShowImage = True
         '
         'SapPsMdLogon
         '
@@ -190,12 +268,16 @@
         Me.ButtonLogoff.Name = "ButtonLogoff"
         Me.ButtonLogoff.ShowImage = True
         '
-        'ButtonWbsSettlementCreate
+        'ButtonCompChange
         '
-        Me.ButtonWbsSettlementCreate.Image = CType(resources.GetObject("ButtonWbsSettlementCreate.Image"), System.Drawing.Image)
-        Me.ButtonWbsSettlementCreate.Label = "Create WBS Settlement"
-        Me.ButtonWbsSettlementCreate.Name = "ButtonWbsSettlementCreate"
-        Me.ButtonWbsSettlementCreate.ShowImage = True
+        Me.ButtonCompChange.Image = CType(resources.GetObject("ButtonCompChange.Image"), System.Drawing.Image)
+        Me.ButtonCompChange.Label = "Change Components"
+        Me.ButtonCompChange.Name = "ButtonCompChange"
+        Me.ButtonCompChange.ShowImage = True
+        '
+        'Separator4
+        '
+        Me.Separator4.Name = "Separator4"
         '
         'SapPsMdRibbon
         '
@@ -234,6 +316,16 @@
     Friend WithEvents ButtonNWAECreate As Microsoft.Office.Tools.Ribbon.RibbonButton
     Friend WithEvents ButtonCompCreate As Microsoft.Office.Tools.Ribbon.RibbonButton
     Friend WithEvents ButtonWbsSettlementCreate As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents Separator2 As Microsoft.Office.Tools.Ribbon.RibbonSeparator
+    Friend WithEvents ButtonProjectChange As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents ButtonWbsChange As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents ButtonWbsCreateSingleMode As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents Separator3 As Microsoft.Office.Tools.Ribbon.RibbonSeparator
+    Friend WithEvents ButtonNetworkChange As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents ButtonNWAChange As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents ButtonNWAEChange As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents Separator4 As Microsoft.Office.Tools.Ribbon.RibbonSeparator
+    Friend WithEvents ButtonCompChange As Microsoft.Office.Tools.Ribbon.RibbonButton
 End Class
 
 Partial Class ThisRibbonCollection
