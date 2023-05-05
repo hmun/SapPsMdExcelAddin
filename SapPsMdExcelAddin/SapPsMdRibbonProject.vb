@@ -183,4 +183,116 @@ Public Class SapPsMdRibbonProject
         End Try
     End Sub
 
+    Public Sub Status(ByRef pSapCon As SapCon, Optional pMode As String = "Set")
+        Dim aPar As New SAPCommon.TStr
+        Dim aIntPar As New SAPCommon.TStr
+
+        ' get general parameters
+        If getGenParameters(aPar) = False Then
+            Exit Sub
+        End If
+        ' get internal parameters
+        If Not getIntParameters(aIntPar) Then
+            Exit Sub
+        End If
+
+        Dim aSAPProjectDefinitionPI As New SAPProjectDefinitionPI(pSapCon, aIntPar)
+
+        Dim jMax As UInt64 = 0
+        Dim aObjNr As UInt64 = 0
+        Dim aProLOff As Integer = If(aIntPar.value("PROJ_LOFF", "DATA") <> "", CInt(aIntPar.value("PROJ_LOFF", "DATA")), 4)
+        Dim aLOffCtrl As Integer = If(aIntPar.value("PROJ_LOFFCTRL", "DATA") <> "", CInt(aIntPar.value("PROJ_LOFFCTRL", "DATA")), 4)
+        Dim aDumpObjNr As UInt64 = If(aIntPar.value("PROJ_DBG", "DUMPOBJNR") <> "", CInt(aIntPar.value("PROJ_DBG", "DUMPOBJNR")), 0)
+        Dim aProWsName As String = If(aIntPar.value("PROJ_WS", "DATA") <> "", aIntPar.value("PROJ_WS", "DATA"), "ProjectDefinition")
+        Dim aProWs As Excel.Worksheet
+        Dim aMsgClmn As String = If(aIntPar.value("PROJ_COL", "STATUSMSG") <> "", aIntPar.value("PROJ_COL", "STATUSMSG"), "INT-STATUSMSG")
+        Dim aMsgClmnNr As Integer = 0
+        Dim aRetStr As String
+        Dim aOKMsg As String = If(aIntPar.value("PROJ_RET", "OKMSG") <> "", aIntPar.value("PROJ_RET", "OKMSG"), "OK")
+
+        Dim aWB As Excel.Workbook
+        aWB = Globals.SapPsMdExcelAddin.Application.ActiveWorkbook
+        Try
+            aProWs = aWB.Worksheets(aProWsName)
+        Catch Exc As System.Exception
+            MsgBox("No " & aProWsName & " Sheet in current workbook. Check if the current workbook is a valid SAP Project Template",
+                   MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap PS Md")
+            Exit Sub
+        End Try
+        parseHeaderLine(aProWs, jMax, aMsgClmn, aMsgClmnNr, pHdrLine:=1)
+        Try
+            log.Debug("SapPsMdRibbonProject.SetStatus - " & "processing data - disabling events, screen update, cursor")
+            Globals.SapPsMdExcelAddin.Application.Cursor = Microsoft.Office.Interop.Excel.XlMousePointer.xlWait
+            Globals.SapPsMdExcelAddin.Application.EnableEvents = False
+            Globals.SapPsMdExcelAddin.Application.ScreenUpdating = False
+            Dim i As UInt64 = aProLOff + 1
+            Dim aKey As String
+            Do
+                aObjNr += 1
+                If Left(CStr(aProWs.Cells(i, aMsgClmnNr).Value), Len(aOKMsg)) <> aOKMsg Then
+                    aKey = CStr(i)
+                    Dim aProItems As New TData(aIntPar)
+                    '                    aProItems.addValue(aKey, CStr(aProWs.Cells(aProLOff - 3, 1).value), CStr(aProWs.Cells(i, 1).value), "", "")
+                    Dim aTSAP_ProjStatusData As TSAP_ProjectStatusData
+                    If pMode = "Get" Then
+                        aTSAP_ProjStatusData = New TSAP_ProjectStatusData(aPar, aIntPar, aSAPProjectDefinitionPI, "GetStatus")
+                    Else
+                        aTSAP_ProjStatusData = New TSAP_ProjectStatusData(aPar, aIntPar, aSAPProjectDefinitionPI, "SetStatus")
+                    End If
+                    ' read DATA
+                    aProItems.ws_parse_line_simple(aProWsName, aProLOff, i, jMax, pHdrLine:=1, pUplLine:=aLOffCtrl + 1)
+                    If aTSAP_ProjStatusData.fillHeader(aProItems) Then
+                        ' check if we should dump this document
+                        If aObjNr = aDumpObjNr Then
+                            log.Debug("SapPsMdRibbonProject.exec - " & "dumping Object Nr " & CStr(aObjNr))
+                            aTSAP_ProjStatusData.dumpHeader()
+                        End If
+                        If pMode = "Get" Then
+                            log.Debug("SapPsMdRibbonProject.GetStatus - " & "calling aSAPProjectDefinitionPI.GetStatus")
+                            aRetStr = aSAPProjectDefinitionPI.GetStatus(aTSAP_ProjStatusData, pOKMsg:=aOKMsg)
+                            log.Debug("SapPsMdRibbonProject.GetStatus - " & "aSAPProjectDefinitionPI.GetStatus returned, aRetStr=" & aRetStr)
+                            aProWs.Cells(i, aMsgClmnNr) = CStr(aRetStr)
+                            ' output the data now
+                            Dim aTData As TData
+                            If aTSAP_ProjStatusData.aDataDic.aTDataDic.ContainsKey("E_SYSTEM_STATUS") Then
+                                aTData = aTSAP_ProjStatusData.aDataDic.aTDataDic("E_SYSTEM_STATUS")
+                                aTData.ws_output_line(aProWsName, "", i, jMax, pCoff:=0, pClear:=False, pKey:="")
+                            End If
+                            If aTSAP_ProjStatusData.aDataDic.aTDataDic.ContainsKey("E_USER_STATUS") Then
+                                aTData = aTSAP_ProjStatusData.aDataDic.aTDataDic("E_USER_STATUS")
+                                aTData.ws_output_line(aProWsName, "", i, jMax, pCoff:=0, pClear:=False, pKey:="")
+                            End If
+                        ElseIf pMode = "Set" Then
+                            log.Debug("SapPsMdRibbonProject.SetStatus - " & "calling aSAPProjectDefinitionPI.SetStatus")
+                            aRetStr = aSAPProjectDefinitionPI.SetStatus(aTSAP_ProjStatusData, pOKMsg:=aOKMsg)
+                            log.Debug("SapPsMdRibbonProject.SetStatus - " & "aSAPProjectDefinitionPI.SetStatus returned, aRetStr=" & aRetStr)
+                            aProWs.Cells(i, aMsgClmnNr) = CStr(aRetStr)
+                        End If
+                    End If
+                End If
+                i += 1
+            Loop While Not String.IsNullOrEmpty(CStr(aProWs.Cells(i, 1).value))
+            log.Debug("SapPsMdRibbonProject.SetStatus - " & "all data processed - enabling events, screen update, cursor")
+            Globals.SapPsMdExcelAddin.Application.EnableEvents = True
+            Globals.SapPsMdExcelAddin.Application.ScreenUpdating = True
+            Globals.SapPsMdExcelAddin.Application.Cursor = Microsoft.Office.Interop.Excel.XlMousePointer.xlDefault
+        Catch ex As System.Exception
+            Globals.SapPsMdExcelAddin.Application.EnableEvents = True
+            Globals.SapPsMdExcelAddin.Application.ScreenUpdating = True
+            Globals.SapPsMdExcelAddin.Application.Cursor = Microsoft.Office.Interop.Excel.XlMousePointer.xlDefault
+            MsgBox("SapPsMdRibbonProject.SetStatus failed! " & ex.Message, MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap PS Md AddIn")
+            log.Error("SapPsMdRibbonProject.SetStatus - " & "Exception=" & ex.ToString)
+            Exit Sub
+        End Try
+    End Sub
+    Private Sub parseHeaderLine(ByRef pWs As Excel.Worksheet, ByRef pMaxJ As Integer, Optional pMsgClmn As String = "", Optional ByRef pMsgClmnNr As Integer = 0, Optional pHdrLine As Integer = 1)
+        pMaxJ = 0
+        Do
+            pMaxJ += 1
+            If Not String.IsNullOrEmpty(pMsgClmn) And CStr(pWs.Cells(pHdrLine, pMaxJ).value) = pMsgClmn Then
+                pMsgClmnNr = pMaxJ
+            End If
+        Loop While CStr(pWs.Cells(pHdrLine, pMaxJ + 1).value) <> ""
+    End Sub
+
 End Class

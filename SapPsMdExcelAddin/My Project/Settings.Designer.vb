@@ -76,6 +76,18 @@ Partial Friend NotInheritable Class MySettings
             Me("SAP_User") = value
         End Set
     End Property
+    
+    <Global.System.Configuration.UserScopedSettingAttribute(),  _
+     Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+     Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+    Public Property SAP_SncMyName() As String
+        Get
+            Return CType(Me("SAP_SncMyName"),String)
+        End Get
+        Set
+            Me("SAP_SncMyName") = value
+        End Set
+    End Property
 End Class
 
 Namespace My

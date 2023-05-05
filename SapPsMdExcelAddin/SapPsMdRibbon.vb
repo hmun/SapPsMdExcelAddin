@@ -99,6 +99,24 @@ Public Class SapPsMdRibbon
         End If
     End Sub
 
+    Private Sub ButtonProjectSetStatus_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonProjectSetStatus.Click
+        Dim aSapPsMdRibbonProject As New SapPsMdRibbonProject
+        If checkCon() = True Then
+            aSapPsMdRibbonProject.Status(pSapCon:=aSapCon, pMode:="Set")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonProjectSetStatus_Click")
+        End If
+    End Sub
+
+    Private Sub ButtonProjectGetStatus_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonProjectGetStatus.Click
+        Dim aSapPsMdRibbonProject As New SapPsMdRibbonProject
+        If checkCon() = True Then
+            aSapPsMdRibbonProject.Status(pSapCon:=aSapCon, pMode:="Get")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonProjectSetStatus_Click")
+        End If
+    End Sub
+
     Private Sub ButtonWbsCreate_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonWbsCreate.Click
         Dim aSapPsMdRibbonWbs As New SapPsMdRibbonWbs
         If checkCon() = True Then
@@ -135,6 +153,24 @@ Public Class SapPsMdRibbon
         End If
     End Sub
 
+    Private Sub ButtonWBSGetStatus_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonWBSGetStatus.Click
+        Dim aSapPsMdRibbonWbs As New SapPsMdRibbonWbs
+        If checkCon() = True Then
+            aSapPsMdRibbonWbs.Status(pSapCon:=aSapCon, pMode:="Get")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonWBSGetStatus_Click")
+        End If
+    End Sub
+
+    Private Sub ButtonWBSSetStatus_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonWBSSetStatus.Click
+        Dim aSapPsMdRibbonWbs As New SapPsMdRibbonWbs
+        If checkCon() = True Then
+            aSapPsMdRibbonWbs.Status(pSapCon:=aSapCon, pMode:="Set")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonWBSSetStatus_Click")
+        End If
+    End Sub
+
     Private Sub ButtonNetworkCreate_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonNetworkCreate.Click
         Dim aSapPsMdRibbonNetwork As New SapPsMdRibbonNetwork
         If checkCon() = True Then
@@ -150,6 +186,23 @@ Public Class SapPsMdRibbon
             aSapPsMdRibbonNetwork.exec(pSapCon:=aSapCon, pMode:="Change")
         Else
             MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonNetworkChange_Click")
+        End If
+    End Sub
+    Private Sub ButtonNetworkGetStatus_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonNetworkGetStatus.Click
+        Dim aSapPsMdRibbonNetwork As New SapPsMdRibbonNetwork
+        If checkCon() = True Then
+            aSapPsMdRibbonNetwork.StatusNetwork(pSapCon:=aSapCon, pMode:="Get")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonNetworkGetStatus_Click")
+        End If
+    End Sub
+
+    Private Sub ButtonNetworkSetStatus_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonNetworkSetStatus.Click
+        Dim aSapPsMdRibbonNetwork As New SapPsMdRibbonNetwork
+        If checkCon() = True Then
+            aSapPsMdRibbonNetwork.StatusNetwork(pSapCon:=aSapCon, pMode:="Set")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonNetworkSetStatus_Click")
         End If
     End Sub
 
@@ -168,6 +221,24 @@ Public Class SapPsMdRibbon
             aSapPsMdRibbonNetwork.execNWA(pSapCon:=aSapCon, pMode:="Change")
         Else
             MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonNWAChange_Click")
+        End If
+    End Sub
+
+    Private Sub ButtonNWAGetStatus_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonNWAGetStatus.Click
+        Dim aSapPsMdRibbonNetwork As New SapPsMdRibbonNetwork
+        If checkCon() = True Then
+            aSapPsMdRibbonNetwork.StatusNWA(pSapCon:=aSapCon, pMode:="Get")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonNWAGetStatus_Click")
+        End If
+    End Sub
+
+    Private Sub ButtonNWASetStatus_Click(sender As Object, e As RibbonControlEventArgs) Handles ButtonNWASetStatus.Click
+        Dim aSapPsMdRibbonNetwork As New SapPsMdRibbonNetwork
+        If checkCon() = True Then
+            aSapPsMdRibbonNetwork.StatusNWA(pSapCon:=aSapCon, pMode:="Set")
+        Else
+            MsgBox("Checking SAP-Connection failed!", MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap ButtonNWASetStatus_Click")
         End If
     End Sub
 
@@ -250,6 +321,4 @@ Public Class SapPsMdRibbon
         End If
 
     End Sub
-
-
 End Class

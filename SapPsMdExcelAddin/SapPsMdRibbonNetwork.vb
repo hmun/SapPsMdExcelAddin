@@ -583,6 +583,220 @@ Public Class SapPsMdRibbonNetwork
         End Try
     End Sub
 
+    Public Sub StatusNWA(ByRef pSapCon As SapCon, Optional pMode As String = "Set")
+        Dim aPar As New SAPCommon.TStr
+        Dim aIntPar As New SAPCommon.TStr
+
+        ' get general parameters
+        If getGenParameters(aPar) = False Then
+            Exit Sub
+        End If
+        ' get internal parameters
+        If Not getIntParameters(aIntPar) Then
+            Exit Sub
+        End If
+
+        Dim aSAPNetworkPI As New SAPNetworkPI(pSapCon)
+
+        Dim jMax As UInt64 = 0
+        Dim aObjNr As UInt64 = 0
+        Dim aNwaLOff As Integer = If(aIntPar.value("NWA_LOFF", "DATA") <> "", CInt(aIntPar.value("NWA_LOFF", "DATA")), 4)
+        Dim aLOffCtrl As Integer = If(aIntPar.value("NWA_LOFFCTRL", "DATA") <> "", CInt(aIntPar.value("NWA_LOFFCTRL", "DATA")), 4)
+        Dim aDumpObjNr As UInt64 = If(aIntPar.value("NWA_DBG", "DUMPOBJNR") <> "", CInt(aIntPar.value("NWA_DBG", "DUMPOBJNR")), 0)
+        Dim aNwaWsName As String = If(aIntPar.value("NWA_WS", "DATA") <> "", aIntPar.value("NWA_WS", "DATA"), "WBS")
+        Dim aNwaWs As Excel.Worksheet
+        Dim aMsgClmn As String = If(aIntPar.value("NWA_COL", "STATUSMSG") <> "", aIntPar.value("NWA_COL", "STATUSMSG"), "INT-STATUSMSG")
+        Dim aMsgClmnNr As Integer = 0
+        Dim aRetStr As String
+        Dim aOKMsg As String = If(aIntPar.value("NWA_RET", "OKMSG") <> "", aIntPar.value("NWA_RET", "OKMSG"), "OK")
+
+        Dim aWB As Excel.Workbook
+        aWB = Globals.SapPsMdExcelAddin.Application.ActiveWorkbook
+        Try
+            aNwaWs = aWB.Worksheets(aNwaWsName)
+        Catch Exc As System.Exception
+            MsgBox("No " & aNwaWsName & " Sheet in current workbook. Check if the current workbook is a valid SAP Project Template",
+                   MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap PS Md")
+            Exit Sub
+        End Try
+        parseHeaderLine(aNwaWs, jMax, aMsgClmn, aMsgClmnNr, pHdrLine:=1)
+        Try
+            log.Debug("SapPsMdRibbonNetwork.StatusNWA - " & "processing data - disabling events, screen update, cursor")
+            Globals.SapPsMdExcelAddin.Application.Cursor = Microsoft.Office.Interop.Excel.XlMousePointer.xlWait
+            Globals.SapPsMdExcelAddin.Application.EnableEvents = False
+            Globals.SapPsMdExcelAddin.Application.ScreenUpdating = False
+            Dim i As UInt64 = aNwaLOff + 1
+            Dim aKey As String
+            Do
+                aObjNr += 1
+                If Left(CStr(aNwaWs.Cells(i, aMsgClmnNr).Value), Len(aOKMsg)) <> aOKMsg Then
+                    aKey = CStr(i)
+                    Dim aNwaItems As New TData(aIntPar)
+                    Dim aTSAP_NetworkStatusData As TSAP_NetworkStatusData
+                    If pMode = "Get" Then
+                        aTSAP_NetworkStatusData = New TSAP_NetworkStatusData(aPar, aIntPar, aSAPNetworkPI, "GetStatus")
+                    Else
+                        aTSAP_NetworkStatusData = New TSAP_NetworkStatusData(aPar, aIntPar, aSAPNetworkPI, "SetStatus")
+                    End If
+                    ' read DATA
+                    aNwaItems.ws_parse_line_simple(aNwaWsName, aNwaLOff, i, jMax, pHdrLine:=1, pUplLine:=aLOffCtrl + 1)
+                    If aTSAP_NetworkStatusData.fillHeader(aNwaItems) And aTSAP_NetworkStatusData.fillData(aNwaItems) Then
+                        ' check if we should dump this document
+                        If aObjNr = aDumpObjNr Then
+                            log.Debug("SapPsMdRibbonNetwork.StatusNWA - " & "dumping Object Nr " & CStr(aObjNr))
+                            aTSAP_NetworkStatusData.dumpHeader()
+                        End If
+                        If pMode = "Get" Then
+                            log.Debug("SapPsMdRibbonNetwork.StatusNWA - " & "calling aSAPNetworkPI.GetStatus")
+                            aRetStr = aSAPNetworkPI.GetStatus(aTSAP_NetworkStatusData, pWITHOUT_ACTIVITIES:="", pOKMsg:=aOKMsg)
+                            log.Debug("SapPsMdRibbonNetwork.StatusNWA - " & "aSAPNetworkPI.GetStatus returned, aRetStr=" & aRetStr)
+                            aNwaWs.Cells(i, aMsgClmnNr) = CStr(aRetStr)
+                            ' output the data now
+                            Dim aTData As TData
+                            If aTSAP_NetworkStatusData.aDataDic.aTDataDic.ContainsKey("E_ACTIVITY_SYSTEM_STATUS") Then
+                                aTData = aTSAP_NetworkStatusData.aDataDic.aTDataDic("E_ACTIVITY_SYSTEM_STATUS")
+                                aTData.ws_output_line(aNwaWsName, "", i, jMax, pCoff:=0, pClear:=False, pKey:="")
+                            End If
+                            If aTSAP_NetworkStatusData.aDataDic.aTDataDic.ContainsKey("E_ACTIVITY_USER_STATUS") Then
+                                aTData = aTSAP_NetworkStatusData.aDataDic.aTDataDic("E_ACTIVITY_USER_STATUS")
+                                aTData.ws_output_line(aNwaWsName, "", i, jMax, pCoff:=0, pClear:=False, pKey:="")
+                            End If
+                        ElseIf pMode = "Set" Then
+                            log.Debug("SapPsMdRibbonNetwork.StatusNWA - " & "calling aSAPNetworkPI.SetStatus")
+                            aRetStr = aSAPNetworkPI.SetStatus(aTSAP_NetworkStatusData, pOKMsg:=aOKMsg)
+                            log.Debug("SapPsMdRibbonNetwork.StatusNWA - " & "aSAPNetworkPI.SetStatus returned, aRetStr=" & aRetStr)
+                            aNwaWs.Cells(i, aMsgClmnNr) = CStr(aRetStr)
+                        End If
+                    End If
+                End If
+                i += 1
+            Loop While Not String.IsNullOrEmpty(CStr(aNwaWs.Cells(i, 1).value))
+            log.Debug("SapPsMdRibbonNetwork.StatusNWA - " & "all data processed - enabling events, screen update, cursor")
+            Globals.SapPsMdExcelAddin.Application.EnableEvents = True
+            Globals.SapPsMdExcelAddin.Application.ScreenUpdating = True
+            Globals.SapPsMdExcelAddin.Application.Cursor = Microsoft.Office.Interop.Excel.XlMousePointer.xlDefault
+        Catch ex As System.Exception
+            Globals.SapPsMdExcelAddin.Application.EnableEvents = True
+            Globals.SapPsMdExcelAddin.Application.ScreenUpdating = True
+            Globals.SapPsMdExcelAddin.Application.Cursor = Microsoft.Office.Interop.Excel.XlMousePointer.xlDefault
+            MsgBox("SapPsMdRibbonNetwork.StatusNWA failed! " & ex.Message, MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap PS Md AddIn")
+            log.Error("SapPsMdRibbonNetwork.StatusNWA - " & "Exception=" & ex.ToString)
+            Exit Sub
+        End Try
+    End Sub
+
+    Public Sub StatusNetwork(ByRef pSapCon As SapCon, Optional pMode As String = "Set")
+        Dim aPar As New SAPCommon.TStr
+        Dim aIntPar As New SAPCommon.TStr
+
+        ' get general parameters
+        If getGenParameters(aPar) = False Then
+            Exit Sub
+        End If
+        ' get internal parameters
+        If Not getIntParameters(aIntPar) Then
+            Exit Sub
+        End If
+
+        Dim aSAPNetworkPI As New SAPNetworkPI(pSapCon)
+
+        Dim jMax As UInt64 = 0
+        Dim aObjNr As UInt64 = 0
+        Dim aNetLOff As Integer = If(aIntPar.value("NETW_LOFF", "DATA") <> "", CInt(aIntPar.value("NETW_LOFF", "DATA")), 4)
+        Dim aLOffCtrl As Integer = If(aIntPar.value("NETW_LOFFCTRL", "DATA") <> "", CInt(aIntPar.value("NETW_LOFFCTRL", "DATA")), 4)
+        Dim aDumpObjNr As UInt64 = If(aIntPar.value("NETW_DBG", "DUMPOBJNR") <> "", CInt(aIntPar.value("NETW_DBG", "DUMPOBJNR")), 0)
+        Dim aNetWsName As String = If(aIntPar.value("NETW_WS", "DATA") <> "", aIntPar.value("NETW_WS", "DATA"), "WBS")
+        Dim aNetWs As Excel.Worksheet
+        Dim aMsgClmn As String = If(aIntPar.value("NETW_COL", "STATUSMSG") <> "", aIntPar.value("NETW_COL", "STATUSMSG"), "INT-STATUSMSG")
+        Dim aMsgClmnNr As Integer = 0
+        Dim aRetStr As String
+        Dim aOKMsg As String = If(aIntPar.value("NETW_RET", "OKMSG") <> "", aIntPar.value("NETW_RET", "OKMSG"), "OK")
+
+        Dim aWB As Excel.Workbook
+        aWB = Globals.SapPsMdExcelAddin.Application.ActiveWorkbook
+        Try
+            aNetWs = aWB.Worksheets(aNetWsName)
+        Catch Exc As System.Exception
+            MsgBox("No " & aNetWsName & " Sheet in current workbook. Check if the current workbook is a valid SAP Project Template",
+                   MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap PS Md")
+            Exit Sub
+        End Try
+        parseHeaderLine(aNetWs, jMax, aMsgClmn, aMsgClmnNr, pHdrLine:=1)
+        Try
+            log.Debug("SapPsMdRibbonNetwork.StatusNetwork - " & "processing data - disabling events, screen update, cursor")
+            Globals.SapPsMdExcelAddin.Application.Cursor = Microsoft.Office.Interop.Excel.XlMousePointer.xlWait
+            Globals.SapPsMdExcelAddin.Application.EnableEvents = False
+            Globals.SapPsMdExcelAddin.Application.ScreenUpdating = False
+            Dim i As UInt64 = aNetLOff + 1
+            Dim aKey As String
+            Do
+                aObjNr += 1
+                If Left(CStr(aNetWs.Cells(i, aMsgClmnNr).Value), Len(aOKMsg)) <> aOKMsg Then
+                    aKey = CStr(i)
+                    Dim aNetItems As New TData(aIntPar)
+                    Dim aTSAP_NetworkStatusData As TSAP_NetworkStatusData
+                    If pMode = "Get" Then
+                        aTSAP_NetworkStatusData = New TSAP_NetworkStatusData(aPar, aIntPar, aSAPNetworkPI, "GetStatus")
+                    Else
+                        aTSAP_NetworkStatusData = New TSAP_NetworkStatusData(aPar, aIntPar, aSAPNetworkPI, "SetStatus")
+                    End If
+                    ' read DATA
+                    aNetItems.ws_parse_line_simple(aNetWsName, aNetLOff, i, jMax, pHdrLine:=1, pUplLine:=aLOffCtrl + 1)
+                    If aTSAP_NetworkStatusData.fillHeader(aNetItems) And aTSAP_NetworkStatusData.fillData(aNetItems) Then
+                        ' check if we should dump this document
+                        If aObjNr = aDumpObjNr Then
+                            log.Debug("SapPsMdRibbonNetwork.StatusNetwork - " & "dumping Object Nr " & CStr(aObjNr))
+                            aTSAP_NetworkStatusData.dumpHeader()
+                        End If
+                        If pMode = "Get" Then
+                            log.Debug("SapPsMdRibbonNetwork.StatusNetwork - " & "calling aSAPNetworkPI.GetStatus")
+                            aRetStr = aSAPNetworkPI.GetStatus(aTSAP_NetworkStatusData, pWITHOUT_ACTIVITIES:="X", pOKMsg:=aOKMsg)
+                            log.Debug("SapPsMdRibbonNetwork.StatusNetwork - " & "aSAPNetworkPI.GetStatus returned, aRetStr=" & aRetStr)
+                            aNetWs.Cells(i, aMsgClmnNr) = CStr(aRetStr)
+                            ' output the data now
+                            Dim aTData As TData
+                            If aTSAP_NetworkStatusData.aDataDic.aTDataDic.ContainsKey("E_SYSTEM_STATUS") Then
+                                aTData = aTSAP_NetworkStatusData.aDataDic.aTDataDic("E_SYSTEM_STATUS")
+                                aTData.ws_output_line(aNetWsName, "", i, jMax, pCoff:=0, pClear:=False, pKey:="")
+                            End If
+                            If aTSAP_NetworkStatusData.aDataDic.aTDataDic.ContainsKey("E_USER_STATUS") Then
+                                aTData = aTSAP_NetworkStatusData.aDataDic.aTDataDic("E_USER_STATUS")
+                                aTData.ws_output_line(aNetWsName, "", i, jMax, pCoff:=0, pClear:=False, pKey:="")
+                            End If
+                        ElseIf pMode = "Set" Then
+                            log.Debug("SapPsMdRibbonNetwork.StatusNetwork - " & "calling aSAPNetworkPI.SetStatus")
+                            aRetStr = aSAPNetworkPI.SetStatus(aTSAP_NetworkStatusData, pOKMsg:=aOKMsg)
+                            log.Debug("SapPsMdRibbonNetwork.StatusNetwork - " & "aSAPNetworkPI.SetStatus returned, aRetStr=" & aRetStr)
+                            aNetWs.Cells(i, aMsgClmnNr) = CStr(aRetStr)
+                        End If
+                    End If
+                End If
+                i += 1
+            Loop While Not String.IsNullOrEmpty(CStr(aNetWs.Cells(i, 1).value))
+            log.Debug("SapPsMdRibbonNetwork.StatusNetwork - " & "all data processed - enabling events, screen update, cursor")
+            Globals.SapPsMdExcelAddin.Application.EnableEvents = True
+            Globals.SapPsMdExcelAddin.Application.ScreenUpdating = True
+            Globals.SapPsMdExcelAddin.Application.Cursor = Microsoft.Office.Interop.Excel.XlMousePointer.xlDefault
+        Catch ex As System.Exception
+            Globals.SapPsMdExcelAddin.Application.EnableEvents = True
+            Globals.SapPsMdExcelAddin.Application.ScreenUpdating = True
+            Globals.SapPsMdExcelAddin.Application.Cursor = Microsoft.Office.Interop.Excel.XlMousePointer.xlDefault
+            MsgBox("SapPsMdRibbonNetwork.StatusNetwork failed! " & ex.Message, MsgBoxStyle.OkOnly Or MsgBoxStyle.Critical, "Sap PS Md AddIn")
+            log.Error("SapPsMdRibbonNetwork.StatusNetwork - " & "Exception=" & ex.ToString)
+            Exit Sub
+        End Try
+    End Sub
+
+    Private Sub parseHeaderLine(ByRef pWs As Excel.Worksheet, ByRef pMaxJ As Integer, Optional pMsgClmn As String = "", Optional ByRef pMsgClmnNr As Integer = 0, Optional pHdrLine As Integer = 1)
+        pMaxJ = 0
+        Do
+            pMaxJ += 1
+            If Not String.IsNullOrEmpty(pMsgClmn) And CStr(pWs.Cells(pHdrLine, pMaxJ).value) = pMsgClmn Then
+                pMsgClmnNr = pMaxJ
+            End If
+        Loop While CStr(pWs.Cells(pHdrLine, pMaxJ + 1).value) <> ""
+    End Sub
+
     Function nextNetwork(ByRef pWs As Excel.Worksheet, pStart As ULong, pMsgClmnNr As Integer, pNetwClmnNr As Integer, pOKMsg As String) As String
         Dim i As ULong = pStart + 1
         nextNetwork = ""
@@ -594,4 +808,6 @@ Public Class SapPsMdRibbonNetwork
             i += 1
         Loop While CStr(pWs.Cells(i, 1).Value) <> ""
     End Function
+
+
 End Class

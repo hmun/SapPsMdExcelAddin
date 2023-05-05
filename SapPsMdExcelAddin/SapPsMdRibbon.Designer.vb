@@ -55,6 +55,12 @@
         Me.Separator2 = Me.Factory.CreateRibbonSeparator
         Me.ButtonProjectChange = Me.Factory.CreateRibbonButton
         Me.ButtonWbsChange = Me.Factory.CreateRibbonButton
+        Me.SAPProjectStatus = Me.Factory.CreateRibbonGroup
+        Me.ButtonProjectGetStatus = Me.Factory.CreateRibbonButton
+        Me.ButtonProjectSetStatus = Me.Factory.CreateRibbonButton
+        Me.Separator5 = Me.Factory.CreateRibbonSeparator
+        Me.ButtonWBSGetStatus = Me.Factory.CreateRibbonButton
+        Me.ButtonWBSSetStatus = Me.Factory.CreateRibbonButton
         Me.SAPNetwork = Me.Factory.CreateRibbonGroup
         Me.ButtonNetworkCreate = Me.Factory.CreateRibbonButton
         Me.ButtonNWACreate = Me.Factory.CreateRibbonButton
@@ -64,24 +70,34 @@
         Me.Separator3 = Me.Factory.CreateRibbonSeparator
         Me.ButtonNetworkChange = Me.Factory.CreateRibbonButton
         Me.ButtonNWAChange = Me.Factory.CreateRibbonButton
+        Me.Separator4 = Me.Factory.CreateRibbonSeparator
         Me.ButtonNWAEChange = Me.Factory.CreateRibbonButton
+        Me.ButtonCompChange = Me.Factory.CreateRibbonButton
         Me.SapPsMdLogon = Me.Factory.CreateRibbonGroup
         Me.ButtonLogon = Me.Factory.CreateRibbonButton
         Me.ButtonLogoff = Me.Factory.CreateRibbonButton
-        Me.ButtonCompChange = Me.Factory.CreateRibbonButton
-        Me.Separator4 = Me.Factory.CreateRibbonSeparator
+        Me.ButtonNetworkGetStatus = Me.Factory.CreateRibbonButton
+        Me.ButtonNetworkSetStatus = Me.Factory.CreateRibbonButton
+        Me.Separator7 = Me.Factory.CreateRibbonSeparator
+        Me.ButtonNWAGetStatus = Me.Factory.CreateRibbonButton
+        Me.ButtonNWASetStatus = Me.Factory.CreateRibbonButton
+        Me.SAPNetworkStatus = Me.Factory.CreateRibbonGroup
         Me.SapPsMd.SuspendLayout()
         Me.Group1.SuspendLayout()
         Me.SAPProject.SuspendLayout()
+        Me.SAPProjectStatus.SuspendLayout()
         Me.SAPNetwork.SuspendLayout()
         Me.SapPsMdLogon.SuspendLayout()
+        Me.SAPNetworkStatus.SuspendLayout()
         Me.SuspendLayout()
         '
         'SapPsMd
         '
         Me.SapPsMd.Groups.Add(Me.Group1)
         Me.SapPsMd.Groups.Add(Me.SAPProject)
+        Me.SapPsMd.Groups.Add(Me.SAPProjectStatus)
         Me.SapPsMd.Groups.Add(Me.SAPNetwork)
+        Me.SapPsMd.Groups.Add(Me.SAPNetworkStatus)
         Me.SapPsMd.Groups.Add(Me.SapPsMdLogon)
         Me.SapPsMd.Label = "SAP PS Md"
         Me.SapPsMd.Name = "SapPsMd"
@@ -174,6 +190,52 @@
         Me.ButtonWbsChange.Name = "ButtonWbsChange"
         Me.ButtonWbsChange.ShowImage = True
         '
+        'SAPProjectStatus
+        '
+        Me.SAPProjectStatus.Items.Add(Me.ButtonProjectGetStatus)
+        Me.SAPProjectStatus.Items.Add(Me.ButtonProjectSetStatus)
+        Me.SAPProjectStatus.Items.Add(Me.Separator5)
+        Me.SAPProjectStatus.Items.Add(Me.ButtonWBSGetStatus)
+        Me.SAPProjectStatus.Items.Add(Me.ButtonWBSSetStatus)
+        Me.SAPProjectStatus.Label = "Project Status"
+        Me.SAPProjectStatus.Name = "SAPProjectStatus"
+        '
+        'ButtonProjectGetStatus
+        '
+        Me.ButtonProjectGetStatus.Image = CType(resources.GetObject("ButtonProjectGetStatus.Image"), System.Drawing.Image)
+        Me.ButtonProjectGetStatus.Label = "Get Project"
+        Me.ButtonProjectGetStatus.Name = "ButtonProjectGetStatus"
+        Me.ButtonProjectGetStatus.ScreenTip = "Get Status Project"
+        Me.ButtonProjectGetStatus.ShowImage = True
+        '
+        'ButtonProjectSetStatus
+        '
+        Me.ButtonProjectSetStatus.Image = CType(resources.GetObject("ButtonProjectSetStatus.Image"), System.Drawing.Image)
+        Me.ButtonProjectSetStatus.Label = "Set Project"
+        Me.ButtonProjectSetStatus.Name = "ButtonProjectSetStatus"
+        Me.ButtonProjectSetStatus.ScreenTip = "Set Status Project"
+        Me.ButtonProjectSetStatus.ShowImage = True
+        '
+        'Separator5
+        '
+        Me.Separator5.Name = "Separator5"
+        '
+        'ButtonWBSGetStatus
+        '
+        Me.ButtonWBSGetStatus.Image = CType(resources.GetObject("ButtonWBSGetStatus.Image"), System.Drawing.Image)
+        Me.ButtonWBSGetStatus.Label = "Get WBS"
+        Me.ButtonWBSGetStatus.Name = "ButtonWBSGetStatus"
+        Me.ButtonWBSGetStatus.ScreenTip = "Get Status WBS"
+        Me.ButtonWBSGetStatus.ShowImage = True
+        '
+        'ButtonWBSSetStatus
+        '
+        Me.ButtonWBSSetStatus.Image = CType(resources.GetObject("ButtonWBSSetStatus.Image"), System.Drawing.Image)
+        Me.ButtonWBSSetStatus.Label = "Set WBS"
+        Me.ButtonWBSSetStatus.Name = "ButtonWBSSetStatus"
+        Me.ButtonWBSSetStatus.ScreenTip = "Set Status WBS"
+        Me.ButtonWBSSetStatus.ShowImage = True
+        '
         'SAPNetwork
         '
         Me.SAPNetwork.Items.Add(Me.ButtonNetworkCreate)
@@ -240,12 +302,23 @@
         Me.ButtonNWAChange.Name = "ButtonNWAChange"
         Me.ButtonNWAChange.ShowImage = True
         '
+        'Separator4
+        '
+        Me.Separator4.Name = "Separator4"
+        '
         'ButtonNWAEChange
         '
         Me.ButtonNWAEChange.Image = CType(resources.GetObject("ButtonNWAEChange.Image"), System.Drawing.Image)
         Me.ButtonNWAEChange.Label = "Change NWA-Elements"
         Me.ButtonNWAEChange.Name = "ButtonNWAEChange"
         Me.ButtonNWAEChange.ShowImage = True
+        '
+        'ButtonCompChange
+        '
+        Me.ButtonCompChange.Image = CType(resources.GetObject("ButtonCompChange.Image"), System.Drawing.Image)
+        Me.ButtonCompChange.Label = "Change Components"
+        Me.ButtonCompChange.Name = "ButtonCompChange"
+        Me.ButtonCompChange.ShowImage = True
         '
         'SapPsMdLogon
         '
@@ -268,16 +341,51 @@
         Me.ButtonLogoff.Name = "ButtonLogoff"
         Me.ButtonLogoff.ShowImage = True
         '
-        'ButtonCompChange
+        'ButtonNetworkGetStatus
         '
-        Me.ButtonCompChange.Image = CType(resources.GetObject("ButtonCompChange.Image"), System.Drawing.Image)
-        Me.ButtonCompChange.Label = "Change Components"
-        Me.ButtonCompChange.Name = "ButtonCompChange"
-        Me.ButtonCompChange.ShowImage = True
+        Me.ButtonNetworkGetStatus.Image = CType(resources.GetObject("ButtonNetworkGetStatus.Image"), System.Drawing.Image)
+        Me.ButtonNetworkGetStatus.Label = "Get Network"
+        Me.ButtonNetworkGetStatus.Name = "ButtonNetworkGetStatus"
+        Me.ButtonNetworkGetStatus.ScreenTip = "Get Status Network"
+        Me.ButtonNetworkGetStatus.ShowImage = True
         '
-        'Separator4
+        'ButtonNetworkSetStatus
         '
-        Me.Separator4.Name = "Separator4"
+        Me.ButtonNetworkSetStatus.Image = CType(resources.GetObject("ButtonNetworkSetStatus.Image"), System.Drawing.Image)
+        Me.ButtonNetworkSetStatus.Label = "Set Network"
+        Me.ButtonNetworkSetStatus.Name = "ButtonNetworkSetStatus"
+        Me.ButtonNetworkSetStatus.ScreenTip = "Set Status Network"
+        Me.ButtonNetworkSetStatus.ShowImage = True
+        '
+        'Separator7
+        '
+        Me.Separator7.Name = "Separator7"
+        '
+        'ButtonNWAGetStatus
+        '
+        Me.ButtonNWAGetStatus.Image = CType(resources.GetObject("ButtonNWAGetStatus.Image"), System.Drawing.Image)
+        Me.ButtonNWAGetStatus.Label = "Get NWA"
+        Me.ButtonNWAGetStatus.Name = "ButtonNWAGetStatus"
+        Me.ButtonNWAGetStatus.ScreenTip = "Get Status NWA"
+        Me.ButtonNWAGetStatus.ShowImage = True
+        '
+        'ButtonNWASetStatus
+        '
+        Me.ButtonNWASetStatus.Image = CType(resources.GetObject("ButtonNWASetStatus.Image"), System.Drawing.Image)
+        Me.ButtonNWASetStatus.Label = "Set NWA"
+        Me.ButtonNWASetStatus.Name = "ButtonNWASetStatus"
+        Me.ButtonNWASetStatus.ScreenTip = "Set Status NWA"
+        Me.ButtonNWASetStatus.ShowImage = True
+        '
+        'SAPNetworkStatus
+        '
+        Me.SAPNetworkStatus.Items.Add(Me.ButtonNetworkGetStatus)
+        Me.SAPNetworkStatus.Items.Add(Me.ButtonNetworkSetStatus)
+        Me.SAPNetworkStatus.Items.Add(Me.Separator7)
+        Me.SAPNetworkStatus.Items.Add(Me.ButtonNWAGetStatus)
+        Me.SAPNetworkStatus.Items.Add(Me.ButtonNWASetStatus)
+        Me.SAPNetworkStatus.Label = "Network Status"
+        Me.SAPNetworkStatus.Name = "SAPNetworkStatus"
         '
         'SapPsMdRibbon
         '
@@ -290,10 +398,14 @@
         Me.Group1.PerformLayout()
         Me.SAPProject.ResumeLayout(False)
         Me.SAPProject.PerformLayout()
+        Me.SAPProjectStatus.ResumeLayout(False)
+        Me.SAPProjectStatus.PerformLayout()
         Me.SAPNetwork.ResumeLayout(False)
         Me.SAPNetwork.PerformLayout()
         Me.SapPsMdLogon.ResumeLayout(False)
         Me.SapPsMdLogon.PerformLayout()
+        Me.SAPNetworkStatus.ResumeLayout(False)
+        Me.SAPNetworkStatus.PerformLayout()
         Me.ResumeLayout(False)
 
     End Sub
@@ -326,6 +438,18 @@
     Friend WithEvents ButtonNWAEChange As Microsoft.Office.Tools.Ribbon.RibbonButton
     Friend WithEvents Separator4 As Microsoft.Office.Tools.Ribbon.RibbonSeparator
     Friend WithEvents ButtonCompChange As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents SAPProjectStatus As Microsoft.Office.Tools.Ribbon.RibbonGroup
+    Friend WithEvents ButtonProjectGetStatus As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents ButtonProjectSetStatus As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents Separator5 As Microsoft.Office.Tools.Ribbon.RibbonSeparator
+    Friend WithEvents ButtonWBSGetStatus As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents ButtonWBSSetStatus As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents ButtonNetworkGetStatus As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents ButtonNetworkSetStatus As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents Separator7 As Microsoft.Office.Tools.Ribbon.RibbonSeparator
+    Friend WithEvents ButtonNWAGetStatus As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents ButtonNWASetStatus As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Friend WithEvents SAPNetworkStatus As Microsoft.Office.Tools.Ribbon.RibbonGroup
 End Class
 
 Partial Class ThisRibbonCollection
